@@ -10,11 +10,15 @@ editor: visual
 #| message: false
 
 library(tidyverse)
+bakers <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-10-25/bakers.csv')
+
 ```
 
 # Dataset
 
-A brief description of your dataset including its provenance, dimensions, etc. as well as the reason why you chose this dataset.
+The dataset comes from TidyTuesday\'s October 25th challenge, it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. We choose this dataset is because it has numerous categorical and numerical variables. 
+
+\
 
 Make sure to load the data and use inline code for some of this information.
 
