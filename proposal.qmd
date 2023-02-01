@@ -3,6 +3,8 @@ title: "Project title"
 subtitle: "Proposal"
 format: html
 editor: visual
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -10,13 +12,17 @@ editor: visual
 #| message: false
 
 library(tidyverse)
-bakers <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-10-25/bakers.csv')
+library(bakeoff)
 
+baker <- bakeoff::bakers
+ratings <- bakeoff::ratings
+challenges <- bakeoff::challenges
+episodes <- bakeoff::episodes
 ```
 
 # Dataset
 
-The dataset comes from TidyTuesday\'s October 25th challenge, it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. We choose this dataset is because it has numerous categorical and numerical variables. 
+The dataset comes from TidyTuesday's October 25th challenge, it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. We choose this dataset is because it has numerous categorical and numerical variables.  The variables we plan on using are `
 
 \
 
