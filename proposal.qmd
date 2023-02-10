@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r}
+```{r load-data}
 #| label: load-pkgs
 #| message: false
 #| echo: FALSE
@@ -34,18 +34,25 @@ We were initially interested in the data set because so many of us enjoyed watch
 
 ## Question 1
 
-The first question we want to address is "How does the number of times that a baker appears in weekly bottom 3 scores correlate to the number of total episodes they appear in?"
+How does a baker’s age and their performance in the technical challenges correlate to the total number of episodes they appear in/how many episodes they last for?
 
 ## Question 2
 
-The second question we want to explore is "By season, how does the number of bakers eliminated correlate to the viewership of the episode?"
+By season, how does the amount of drama in an episode (suggesting that more bakers eliminated indicates more drama and that as the season progresses [such that the bakers’ relationships are more developed] the show gets more dramatic) correlate to viewership of the episode? Are more dramatic episodes in the season viewed more?
 
 # Analysis plan
 
 ## Question 1
 
-We plan on creating a new variable called `age_generation` by subtracting the contestants' age at the time of competition from the show's original air date to find each contestant's birth year. We will then use the birth year to group each contestant by their generation and plot their ages using a discrete color scale. We will be finding the generational divides using the years given by [weforum.org](https://www.weforum.org/agenda/2015/09/how-different-age-groups-identify-with-their-generational-labels/). We will also plot `episodes_appeared` on the x-axis and `bottom_three` on the y-axis using a scatter plot. We will then add a trend line in order to see the relationship between the two. Finally, we will facet to differentiate between seasons.
+We will create two scatter plot graphs that have the percentage of episodes the baker appeared in (`percent_episodes_appeared`) on the y-axis. We’re using the percentage of episodes appeared in rather than the total number of episodes appeared in because although most seasons have 10 episodes, - according to Wikipedia - season 1 has 6 episodes and season 2 has 8 episodes. Because the number of episodes per season isn’t standardized, we can’t equally compare the total number of episodes appeared in across the seasons.
+
+On the x-axis of the first graph we’ll have how many times a baker scored in the bottom three on the technical challenge and how many times a baker scored the absolute lowest on a technical challenge in order to investigate how poor performance in technical challenges correlates to the total number of episodes appeared in. On the x-axis of the second graph, we’ll have how many times a baker scored in the top three on the technical challenge and how many times a baker scored the absolute highest on a technical challenge in order to investigate how strong performance in technical challenges correlates to the total number of episodes appeared in. Both graphs will have a trend line for each y variable, created using geom_smooth to better understand the relationship between performance and percentage of episodes appeared in.
+
+Finally, we plan on creating a new variable called `age_generation` by subtracting the age of the contestants at the time of competition from the air date of the season in order to find the birth year of each contestant. We will then use the birth year to group each contestant by their generation and plot their ages using a discrete color scale. We will be finding the generational divides using the years given by [weforum.org](https://www.weforum.org/agenda/2015/09/how-different-age-groups-identify-with-their-generational-labels/). The points will be colored and shaped by age so that we can see if the data of different age groups tends to clump around certain success levels in technical challenges or longevities in the show, which would reflect the priorities of different age groups in the show (do they prioritize technical skills or creativity?) and which age groups tend to last the longest in the show.
 
 ## Question 2
 
-In order to compare the viewership distribution for each potential number of bakers eliminated (either zero, one, or two), we will plot vertical box plots of both the 7-day and 28-day viewership (distinguishing them by color) for each number of bakers eliminated. This format will allow us to compare how viewership may vary between the two timespan calculations and between the different numbers of bakers eliminated. Finally, these graphs will also be faceted by season.
+In order to compare the viewership distribution for each potential number of bakers eliminated (either zero, one, or two), we will plot vertical box plots of both the 7-day and 28-day viewership (distinguishing them by color) for each number of bakers eliminated. This format will allow us to compare how viewership may vary between the two timespan calculations and between the different numbers of bakers eliminated, which we are interested in becaue we believe the 7-day viewership gives an understanding of how many fans of the show are watching the show regularly, while the 28-day viewership variable can potentially give us a better understanding of the amount of casual watchers who tune in. The first graph will also be faceted by season to investigate the correlation to viewership of changes in presenters & judges (which changed after season 7) and of changes in the broadcasting network (between seasons the show went through three different broadcasters: BBC Two, BBC One, then Channel 4).
+
+For the second question, we will use a ridge plot in order to investigate how different numbered episodes (for example, episode one of each season vs. episode 6 of each season) correlates to the viewership. Because the show's relationships (and thus, the show's drama/intensity) develop as each season progresses, we expect to see the viewership also increase with each episode. 
+
