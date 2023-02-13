@@ -22,7 +22,7 @@ challenges <- bakeoff::challenges
 episodes <- bakeoff::episodes
 ```
 
-# Dataset
+## Dataset
 
 The dataset comes from TidyTuesday's October 25th, 2022 challenge and can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. The dataset includes 4 dataframes: `bakers`, `ratings`, `challenges`, and `episodes`. `bakers` has 120 rows, each representing an individual baker, and 24 columns. `ratings` has 94 rows, each representing an episode, and 11 variables, including ratings and the original airdates in the US and the UK. `challenges` has details about the three types of challenges (signature, technical, and showstopper) as well as the performance of each baker (star baker, eliminated). It has 1136 rows, each representing a baker per episode, and 7 variables. As for `episodes`, it has 94 rows and 10 variables. Each row represents an episode and the variables describe different attributes of the episode like the number of bakers that appeared in it and the name of eliminated bakers. The variables we plan on using are: `percent_episodes_appeared`, `technical_bottom`, `technical_top3`, `series`, `age`, `viewers_7day`, `viewers_28day`, `uk_airdate`, and `bakers_out`. Respectively, these variables represent the number of episodes in a given series/season in which a given baker appeared out of all episodes aired in that series/season, the number of times a given baker was in the bottom 3 on the technical challenge, the season number (1-10), the age in years in the first episode appeared, the number of viewers in millions within a 7-day window from airdate, the number of viewers in millions within a 28-day window from airdate, the original airdate of an episode in the UK, and the number of bakers were either eliminated, left at will, or left due to illness in that episode.
 
@@ -30,19 +30,19 @@ More information on the dataset can be found under the [official reference manua
 
 We were initially interested in the data set because so many of us enjoyed watching the British and French versions of the show, but our main deciding factor was the fact that the data set has such a vast array of both categorical and numerical variables.
 
-# Questions
+## Questions
 
-## Question 1
+### Question 1
 
 How does a baker's age and their performance in the technical challenges correlate to the total number of episodes they appear in (i.e. how many episodes they last for)?
 
-## Question 2
+### Question 2
 
 By season, how does the amount of drama in an episode (suggesting that more bakers eliminated indicates more drama and that as the season progresses \[such that the bakers' relationships are more developed\] the show gets more dramatic) correlate to viewership of the episode? Are more dramatic episodes in the season viewed more?
 
-# Analysis plan
+## Analysis plan
 
-## Question 1
+### Question 1
 
 We will create two scatter plot graphs that have the percentage of episodes the baker appeared in (`percent_episodes_appeared`) on the y-axis. We're using the percentage of episodes appeared in rather than the total number of episodes appeared in because although most seasons have 10 episodes, - according to [Wikipedia](https://en.wikipedia.org/wiki/The_Great_British_Bake_Off) - season 1 has 6 episodes and season 2 has 8 episodes. Because the number of episodes per season isn't standardized, we can't equally compare the total number of episodes appeared in across the seasons.
 
@@ -52,7 +52,7 @@ On the x-axis of the second graph, we'll have how many times a baker scored in t
 
 Finally, we plan on creating a new variable called `age_generation` by subtracting the age of the contestants at the time of competition from the air date of the season in order to find the birth year of each contestant. We will then use the birth year to group each contestant by their generation and plot their ages using a discrete color scale. We will be finding the generational divides using the years given by [weforum.org](https://www.weforum.org/agenda/2015/09/how-different-age-groups-identify-with-their-generational-labels/). The points will be colored and shaped by age so that we can see if the data of different age groups tends to clump around certain success levels in technical challenges or longevities in the show, which would reflect the priorities of different age groups in the show (do they prioritize technical skills or creativity?) and which age groups tend to last the longest in the show.
 
-## Question 2
+### Question 2
 
 In order to compare the viewership distribution for each potential number of bakers eliminated (either zero, one, or two), we will plot vertical box plots of both the 7-day and 28-day viewership (distinguishing them by color) for each number of bakers eliminated. This format will allow us to compare how viewership may vary between the two time span calculations and between the different numbers of bakers eliminated, which we are interested in because we believe the 7-day viewership gives an understanding of how many fans of the show are watching the show regularly, while the 28-day viewership variable can potentially give us a better understanding of the amount of casual watchers who tune in. The first graph will also be faceted by season to investigate the correlation to viewership of changes in presenters & judges (which changed after season 7) and of changes in the broadcasting network (between seasons the show went through three different broadcasters: BBC Two, BBC One, then Channel 4).
 
