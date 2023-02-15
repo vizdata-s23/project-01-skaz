@@ -29,7 +29,7 @@ We were initially interested in the data set because so many of us enjoyed watch
 
 ### Question 1
 
-How does a baker's age and their performance in the technical challenges correlate to the total number of episodes they appear in (i.e. how many episodes they last for)?
+How does a baker's age (at the time of the competition) and their performance in the technical challenges correlate to the total number of episodes they appear in (i.e. how many episodes they last for)?
 
 ### Question 2
 
@@ -49,6 +49,6 @@ Finally, we plan on creating a new variable called `age_generation` by subtracti
 
 ### Question 2
 
-In order to compare the viewership distribution based on the presenters and network the show was on (which vary by season), we will plot vertical box plots of both the 7-day and 28-day viewership. The 7-day viewership gives an understanding of how many fans of the show are watching the show regularly, while the 28-day viewership variable can potentially give us a better understanding of the amount of casual watchers who tune in, which is why we\'re interested in the distinction between the two. The first graph will also be faceted by season to investigate the correlation to viewership of changes in presenters & judges (which changed after season 7) and of changes in the broadcasting network (between seasons the show went through three different broadcasters: BBC Two, BBC One, then Channel 4). We will change the background color of each season\'s graph to indicate who the presenters & judges were for the season, and we\'ll change the border color of the graph to indicate which network it was on. 
+In order to compare the viewership distribution based on the presenters and network the show was on (which vary by season), we will plot vertical box plots of the 7-day viewership. The 7-day viewership gives an understanding of how many fans of the show are watching it regularly, and while the 28-day viewership would give us a different lens on viewership, the data for 28-day viewership is remarkably inconsistent across seasons (we think there may have been some errors in data collection). The first graph will also be faceted by season to investigate the correlation to viewership of changes in presenters & judges (which changed after season 7) and of changes in the broadcasting network (between seasons the show went through three different broadcasters: BBC Two, BBC One, then Channel 4). We will change the background color of each season\'s graph to indicate who the presenters & judges were for the season, and we\'ll change the border color of the graph to indicate which network it was on.
 
 For the second plot, we will use a ridge plot in order to investigate how different numbered episodes (for example, episode one of each season vs. episode 6 of each season) correlates to the viewership. Because the show's relationships (and thus, the show's drama/intensity) develop as each season progresses, we expect to see the viewership also increase with each episode.
