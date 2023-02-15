@@ -47,12 +47,21 @@ bakers <- bakers |>
                                          TRUE ~ first_year_appeared))
 bakers <- bakers |>
   mutate(birth_year = as.numeric(first_year_appeared) - age) |>
-  mutate(generation = case_when(birth_year >= 1928 & birth_year <= 1945 ~ "silent",
+  mutate(age_generation = case_when(birth_year >= 1928 & birth_year <= 1945 ~ "silent",
                                 birth_year >= 1946 & birth_year <= 1964 ~ "boomer",
                                 birth_year >= 1965 & birth_year <= 1980 ~ "gen x",
                                 birth_year >= 1981 & birth_year <= 1996 ~ "millenial",
                                 birth_year >= 1997 & birth_year <= 2012 ~ "gen z"))
 ```
+
+```{r first-plot}
+ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared, color = age_generation)) +
+  geom_point(shape = 1) +
+  geom_smooth(aes(x = technical_bottom), se= FALSE) +
+  geom_point(aes(x = technical_top3), shape = 16) +
+  geom_smooth(aes(x = technical_top3), se = FALSE)
+```
+
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
 
