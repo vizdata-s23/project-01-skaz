@@ -18,8 +18,7 @@ warning: FALSE
 ```{r load-data}
 library(tidyverse)
 library(bakeoff)
-
-bakers <- bakeoff::bakers
+library(lubridate)
 ```
 
 ## Introduction
@@ -34,19 +33,18 @@ bakers <- bakeoff::bakers
 
 ### Approach
 
-(1-2 paragraphs): Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g. boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
+(1-2 paragraphs): Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g. boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
 
 ### Analysis
 
 ```{r age-data-wrangling}
 bakers <- bakers |>
-  separate(col = first_date_appeared, remove = TRUE, sep = "-", into = "first_year_appeared") 
+  separate(col = first_date_appeared, remove = FALSE, sep = "-", into = "first_year_appeared")
 
-#bakers <- bakers |>
- # mutate(first_year_appeared = case_when(series == 9 ~ 2018,
-  #                                       series == 10 ~ 2019,
-   #                                      TRUE ~ first_year_appeared))
-
+bakers <- bakers |>
+  mutate(first_year_appeared = case_when(series == 9 ~ "2018",
+                                         series == 10 ~ "2019",
+                                         TRUE ~ first_year_appeared))
 bakers <- bakers |>
   mutate(birth_year = as.numeric(first_year_appeared) - age) |>
   mutate(generation = case_when(birth_year >= 1928 & birth_year <= 1945 ~ "silent",
@@ -54,7 +52,6 @@ bakers <- bakers |>
                                 birth_year >= 1965 & birth_year <= 1980 ~ "gen x",
                                 birth_year >= 1981 & birth_year <= 1996 ~ "millenial",
                                 birth_year >= 1997 & birth_year <= 2012 ~ "gen z"))
-  
 ```
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
