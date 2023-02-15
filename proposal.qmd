@@ -15,11 +15,6 @@ editor_options:
 
 library(tidyverse)
 library(bakeoff)
-
-baker <- bakeoff::bakers
-ratings <- bakeoff::ratings
-challenges <- bakeoff::challenges
-episodes <- bakeoff::episodes
 ```
 
 ## Dataset
