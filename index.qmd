@@ -19,6 +19,7 @@ warning: FALSE
 library(tidyverse)
 library(bakeoff)
 library(lubridate)
+library(forcats)
 ```
 
 ## Introduction
@@ -55,11 +56,12 @@ bakers <- bakers |>
 ```
 
 ```{r first-plot}
-ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared, color = age_generation)) +
-  geom_point(shape = 1) +
-  geom_smooth(aes(x = technical_bottom), se= FALSE) +
-  geom_point(aes(x = technical_top3), shape = 16) +
-  geom_smooth(aes(x = technical_top3), se = FALSE)
+ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)) +
+  geom_point(shape = 1, color = "red") +
+  geom_smooth(aes(x = technical_bottom), se= FALSE, linetype = "dashed", color = "red") +
+  geom_point(aes(x = technical_top3), shape = 16, color = "darkgreen") +
+  geom_smooth(aes(x = technical_top3), se = FALSE, color = "darkgreen") +
+  facet_wrap(~age_generation)
 ```
 
 
