@@ -19,7 +19,7 @@ warning: FALSE
 library(tidyverse)
 library(bakeoff)
 library(lubridate)
-library(forcats)
+library(plotly)
 ```
 
 ## Introduction
@@ -52,14 +52,18 @@ bakers <- bakers |>
                                 birth_year >= 1946 & birth_year <= 1964 ~ "Baby Boomers",
                                 birth_year >= 1965 & birth_year <= 1980 ~ "Gen X",
                                 birth_year >= 1981 & birth_year <= 1996 ~ "Millenials",
-                                birth_year >= 1997 & birth_year <= 2012 ~ "Gen Z"))
+                                birth_year >= 1997 & birth_year <= 2012 ~ "Gen Z"))|>
+  mutate(baker_stats = paste(baker_full, "\n Birth Year:",birth_year,"\n Age:",age," \n Hometown:",hometown,"\n Occupation:", occupation))|>
+  mutate_if(is.numeric, round, digits = 1)
 ```
 
+text = stats
+
 ```{r first-plot}
-ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)) +
-  geom_point(shape = 1, color = "red") +
+plot1 <- ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)) +
+  geom_point(shape = 1, color = "red",aes(text = baker_stats)) +
   geom_smooth(aes(x = technical_bottom, color = "# of Bottom 3 Appearances"), se= FALSE) +
-  geom_point(aes(x = technical_top3), shape = 16, color = "darkgreen") +
+  geom_point(aes(x = technical_top3, text = baker_stats), shape = 16, color = "darkgreen") +
   geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"), se = FALSE) +
   facet_wrap(~factor(age_generation, levels = c("Baby Boomers", "Gen X", "Millenials", "Silent Generation", "Gen Z"))) +
   labs(y = "Percentage of Episodes Appeared In",
@@ -71,8 +75,9 @@ ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)) +
                      values=c('# of Bottom 3 Appearances'='red', '# of Top 3 Appearances'='darkgreen')) +
   theme_bw() +
   theme(legend.position = c(0.85, 0.275))
-```
 
+ggplotly(plot1)
+```
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
 
