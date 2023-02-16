@@ -48,20 +48,29 @@ bakers <- bakers |>
                                          TRUE ~ first_year_appeared))
 bakers <- bakers |>
   mutate(birth_year = as.numeric(first_year_appeared) - age) |>
-  mutate(age_generation = case_when(birth_year >= 1928 & birth_year <= 1945 ~ "silent",
-                                birth_year >= 1946 & birth_year <= 1964 ~ "boomer",
-                                birth_year >= 1965 & birth_year <= 1980 ~ "gen x",
-                                birth_year >= 1981 & birth_year <= 1996 ~ "millenial",
-                                birth_year >= 1997 & birth_year <= 2012 ~ "gen z"))
+  mutate(age_generation = case_when(birth_year >= 1928 & birth_year <= 1945 ~ "Silent Generation",
+                                birth_year >= 1946 & birth_year <= 1964 ~ "Baby Boomers",
+                                birth_year >= 1965 & birth_year <= 1980 ~ "Gen X",
+                                birth_year >= 1981 & birth_year <= 1996 ~ "Millenials",
+                                birth_year >= 1997 & birth_year <= 2012 ~ "Gen Z"))
 ```
 
 ```{r first-plot}
 ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)) +
   geom_point(shape = 1, color = "red") +
-  geom_smooth(aes(x = technical_bottom), se= FALSE, linetype = "dashed", color = "red") +
+  geom_smooth(aes(x = technical_bottom, color = "# of Bottom 3 Appearances"), se= FALSE) +
   geom_point(aes(x = technical_top3), shape = 16, color = "darkgreen") +
-  geom_smooth(aes(x = technical_top3), se = FALSE, color = "darkgreen") +
-  facet_wrap(~age_generation)
+  geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"), se = FALSE) +
+  facet_wrap(~factor(age_generation, levels = c("Baby Boomers", "Gen X", "Millenials", "Silent Generation", "Gen Z"))) +
+  labs(y = "Percentage of Episodes Appeared In",
+       x = "Number of Times Appearing in Technial Top or Bottom 3",
+       title = "Episode Appearances vs. Top/Bottom 3 Performance",
+       subtitle = "By Age Generation of Bakers from Great British Baking Show") +
+  scale_color_manual(name = NULL,
+    breaks=c('# of Bottom 3 Appearances', '# of Top 3 Appearances'),
+                     values=c('# of Bottom 3 Appearances'='red', '# of Top 3 Appearances'='darkgreen')) +
+  theme_bw() +
+  theme(legend.position = c(0.85, 0.275))
 ```
 
 
