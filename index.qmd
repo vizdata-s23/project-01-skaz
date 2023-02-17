@@ -115,6 +115,42 @@ ggplot(ratings, aes(x = series, y = viewers_7day_mean, color = channel))+
     x = "Series",
     y = "7 Day Viewership Mean"
   )
+
+```
+
+```{r Q2-plot2}
+
+library(tidyverse)
+library(bakeoff)
+library(dplyr)
+library(ggridges)
+library(scales)
+
+new_ratings <-
+  ratings |>
+  mutate(
+    episode = as.factor(episode),
+    series = as.factor(series))
+
+#per_episode <-
+#  ratings |>
+#  group_by(episode) |>
+#  mutate(episode_mean = mean(viewers_7day))
+
+ggplot(new_ratings, aes(x=viewers_7day, y=episode)) +
+  geom_density_ridges_gradient(aes(fill=episode), scale=1, rel_min_height=0.01, show.legend = FALSE) +
+  geom_vline(aes(xintercept=median(viewers_7day)))+
+#  geom_point(data=per_episode, aes(x=episode_mean, y=episode))+
+#  geom_line(data=per_episode, aes(x=episode_mean, y=episode))+
+  annotate("text", x=8.6, y=5.9, label="Median", angle=90, fontface="bold")+
+  scale_fill_bakeoff(palette="showstopper")+
+  labs(x= "Viewers (in Millions)",
+       y= "Episode Number",
+       title= "Ridge densities of number of viewers in 7-day period per episode",
+       caption= "Source: TidyTuesday (October 25th, 2022)")+
+  theme_minimal()
+
+
 ```
 
 ### Introduction
