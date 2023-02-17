@@ -79,6 +79,26 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)
 ggplotly(plot1)
 ```
 
+```{r second-plot}
+plot2 <- ggplot(bakers, aes(x = technical_lowest, y = percent_episodes_appeared)) +
+  geom_point(shape = 1, color = "red",aes(text = baker_stats)) +
+  geom_smooth(aes(x = technical_lowest, color = "# of Bottom Appearances"), se= FALSE) +
+  geom_point(aes(x = technical_highest, text = baker_stats), shape = 16, color = "darkgreen") +
+  geom_smooth(aes(x = technical_highest, color = "# of Top Appearances"), se = FALSE) +
+  facet_wrap(~factor(age_generation, levels = c("Baby Boomers", "Gen X", "Millenials", "Silent Generation", "Gen Z"))) +
+  labs(y = "Percentage of Episodes Appeared In",
+       x = "Number of Times Appearing in Technial Top or Bottom 3",
+       title = "Episode Appearances vs. Top/Bottom Performance",
+       subtitle = "By Age Generation of Bakers from Great British Baking Show") +
+  scale_color_manual(name = NULL,
+    breaks=c('# of Bottom Appearances', '# of Top Appearances'),
+                     values=c('# of Bottom Appearances'='red', '# of Top Appearances'='darkgreen')) +
+  theme_bw() +
+  theme(legend.position = c(0.85, 0.275))
+
+ggplotly(plot2)
+```
+
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
 
 ### Discussion
