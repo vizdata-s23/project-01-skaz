@@ -4,6 +4,9 @@ subtitle: "STA/ISS 313 - Project 1"
 author: "Team Name"
 format: html
 editor: visual
+echo: FALSE
+message: FALSE
+warning: FALSE
 ---
 
 ## Abstract
@@ -11,6 +14,13 @@ editor: visual
 (1 paragraph): Project abstract.
 
 ------------------------------------------------------------------------
+
+```{r load-data}
+library(tidyverse)
+library(bakeoff)
+library(lubridate)
+library(plotly)
+```
 
 ## Introduction
 
@@ -24,9 +34,50 @@ editor: visual
 
 ### Approach
 
-(1-2 paragraphs): Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g. boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
+(1-2 paragraphs): Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g. boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
 
 ### Analysis
+
+```{r age-data-wrangling}
+bakers <- bakers |>
+  separate(col = first_date_appeared, remove = FALSE, sep = "-", into = "first_year_appeared")
+
+bakers <- bakers |>
+  mutate(first_year_appeared = case_when(series == 9 ~ "2018",
+                                         series == 10 ~ "2019",
+                                         TRUE ~ first_year_appeared))
+bakers <- bakers |>
+  mutate(birth_year = as.numeric(first_year_appeared) - age) |>
+  mutate(age_generation = case_when(birth_year >= 1928 & birth_year <= 1945 ~ "Silent Generation",
+                                birth_year >= 1946 & birth_year <= 1964 ~ "Baby Boomers",
+                                birth_year >= 1965 & birth_year <= 1980 ~ "Gen X",
+                                birth_year >= 1981 & birth_year <= 1996 ~ "Millenials",
+                                birth_year >= 1997 & birth_year <= 2012 ~ "Gen Z"))|>
+  mutate(baker_stats = paste(baker_full, "\n Birth Year:",birth_year,"\n Age:",age," \n Hometown:",hometown,"\n Occupation:", occupation))|>
+  mutate_if(is.numeric, round, digits = 1)
+```
+
+text = stats
+
+```{r first-plot}
+plot1 <- ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)) +
+  geom_point(shape = 1, color = "red",aes(text = baker_stats)) +
+  geom_smooth(aes(x = technical_bottom, color = "# of Bottom 3 Appearances"), se= FALSE) +
+  geom_point(aes(x = technical_top3, text = baker_stats), shape = 16, color = "darkgreen") +
+  geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"), se = FALSE) +
+  facet_wrap(~factor(age_generation, levels = c("Baby Boomers", "Gen X", "Millenials", "Silent Generation", "Gen Z"))) +
+  labs(y = "Percentage of Episodes Appeared In",
+       x = "Number of Times Appearing in Technial Top or Bottom 3",
+       title = "Episode Appearances vs. Top/Bottom 3 Performance",
+       subtitle = "By Age Generation of Bakers from Great British Baking Show") +
+  scale_color_manual(name = NULL,
+    breaks=c('# of Bottom 3 Appearances', '# of Top 3 Appearances'),
+                     values=c('# of Bottom 3 Appearances'='red', '# of Top 3 Appearances'='darkgreen')) +
+  theme_bw() +
+  theme(legend.position = c(0.85, 0.275))
+
+ggplotly(plot1)
+```
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
 
@@ -35,6 +86,36 @@ editor: visual
 (1-3 paragraphs): In the Discussion section, interpret the results of your analysis. Identify any trends revealed (or not revealed) by the plots. Speculate about why the data looks the way it does.
 
 ## Question 2: Title that relates to the question you're answering
+
+```{r Q2-plot1}
+ratings <- ratings |>
+  group_by(series)|>
+  mutate(viewers_7day_mean = mean(viewers_7day)) |>
+  mutate(presenters = case_when(
+    series <=7 ~ "Sue Perkins & Mel Giedroyc",
+    series >=8 & series <=10 ~ "Noel Fielding & Sandi Toksvig"
+  ))|>
+  mutate(judges = case_when(
+    series <= 7 ~ "Paul Hollywood & Mary Berry",
+    series >= 8 ~ "Paul Hollywood & Prue Leith"
+  )) |>
+  mutate(channel = case_when(
+    series <= 4 ~ "BBC Two",
+    series >4 & series <8 ~ "BBC One", 
+    series >= 8 ~ "Channel 4"
+  ))
+#FIX ISSUES
+
+ggplot(ratings, aes(x = series, y = viewers_7day_mean, color = channel))+
+  geom_line()+
+  scale_x_discrete(limits=c("1", "2", "3","4","5","6","7","8","9","10"))+
+  theme_minimal()+
+  labs(
+    title = "Mean Viewers by Series",
+    x = "Series",
+    y = "7 Day Viewership Mean"
+  )
+```
 
 ### Introduction
 
