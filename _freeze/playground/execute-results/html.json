@@ -1,0 +1,14 @@
+{
+  "hash": "aaf6357cc2935551cc3720135360160b",
+  "result": {
+    "markdown": "::: {.cell}\n\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\n#gb_cities <- \n#  read_csv(file=\"data/gb.csv\")\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\n#new_bakers <-\n # left_join(bakers, gb_cities, by=c(\"hometown\"=\"city\")\n#)\n#sum(is.na(new_bakers$lat))\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\n#library(ggridges)\n\n#library(scales)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\n#new_ratings <-\n # ratings |>\n  #mutate(episode = as.factor(episode))\n\n#ggplot(new_ratings, aes(x=viewers_7day, y=episode, fill=series, group=series)) +\n  #geom_density_ridges_gradient(scale=1, rel_min_height=0.01) +\n  #scale_fill_bakeoff(palette=\"showstopper\")\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

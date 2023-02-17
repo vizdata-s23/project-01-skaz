@@ -4,39 +4,39 @@
 #| echo: FALSE
 #| warning: FALSE
 
-library(tidyverse)
-library(bakeoff)
-library(dplyr)
+#library(tidyverse)
+#library(bakeoff)
+#library(dplyr)
 
 ```
 ```{r}
-gb_cities <- 
-  read_csv(file="data/gb.csv")
+#gb_cities <- 
+#  read_csv(file="data/gb.csv")
 ```
 
 ```{r}
 
-new_bakers <-
-  left_join(bakers, gb_cities, by=c("hometown"="city")
-)
-sum(is.na(new_bakers$lat))
+#new_bakers <-
+ # left_join(bakers, gb_cities, by=c("hometown"="city")
+#)
+#sum(is.na(new_bakers$lat))
 
 
 ```
 ```{r}
-library(ggridges)
+#library(ggridges)
 
-library(scales)
+#library(scales)
 ```
 
 ```{r}
-new_ratings <-
-  ratings |>
-  mutate(episode = as.factor(episode))
+#new_ratings <-
+ # ratings |>
+  #mutate(episode = as.factor(episode))
 
-ggplot(new_ratings, aes(x=viewers_7day, y=episode, fill=series, group=series)) +
-  geom_density_ridges_gradient(scale=1, rel_min_height=0.01) +
-  scale_fill_bakeoff(palette="showstopper")
+#ggplot(new_ratings, aes(x=viewers_7day, y=episode, fill=series, group=series)) +
+  #geom_density_ridges_gradient(scale=1, rel_min_height=0.01) +
+  #scale_fill_bakeoff(palette="showstopper")
   
   
 ```
