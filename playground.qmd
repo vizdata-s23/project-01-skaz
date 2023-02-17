@@ -34,7 +34,10 @@ new_ratings <-
   ratings |>
   mutate(episode = as.factor(episode))
 
-ggplot(new_ratings, aes(x=viewers_7day, y=episode))+
-  geom_density_ridges(scale=1, rel_min_height = 0.01)
+ggplot(new_ratings, aes(x=viewers_7day, y=episode, fill=series, group=series)) +
+  geom_density_ridges_gradient(scale=1, rel_min_height=0.01) +
+  scale_fill_bakeoff(palette="showstopper")
+  
+  
 ```
 
