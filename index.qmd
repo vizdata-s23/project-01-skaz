@@ -1,7 +1,7 @@
 ---
 title: "Project title"
 subtitle: "STA/ISS 313 - Project 1"
-author: "Team Name"
+author: "SKAZ"
 format: html
 editor: visual
 echo: FALSE
@@ -108,6 +108,8 @@ ggplotly(plot2)
 ## Question 2: Title that relates to the question you're answering
 
 ```{r Q2-plot1}
+
+
 ratings <- ratings |>
   group_by(series)|>
   mutate(viewers_7day_mean = mean(viewers_7day)) |>
@@ -123,17 +125,28 @@ ratings <- ratings |>
     series <= 4 ~ "BBC Two",
     series >4 & series <8 ~ "BBC One", 
     series >= 8 ~ "Channel 4"
-  ))
-#FIX ISSUES
+  )) 
 
-ggplot(ratings, aes(x = series, y = viewers_7day_mean, color = channel))+
-  geom_line()+
-  scale_x_discrete(limits=c("1", "2", "3","4","5","6","7","8","9","10"))+
+format <- tribble(
+  ~box_min, ~box_max, ~color,
+  0,        4,        "#5A8AD8",
+  4,        7,        "#51A03F",
+  7,        11,       "#A23434"
+  )
+
+ggplot(data = ratings, aes(x = series, y = viewers_7day_mean))+
+  geom_rect(data = format, 
+    aes(xmin = box_min, xmax = box_max,
+        ymin = 2.240, ymax = 15.9,
+        fill = color, x = NULL, y = NULL))+
+  geom_point(size = 4)+
+  coord_cartesian()+
+  scale_x_continuous(breaks = seq(1, 10, 1))+
   theme_minimal()+
   labs(
-    title = "Mean Viewers by Series",
+    title = "Number Viewers across Series",
     x = "Series",
-    y = "7 Day Viewership Mean"
+    y = "Mean 7 Day Viewership (by millions)"
   )
 
 ```
