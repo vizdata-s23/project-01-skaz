@@ -26,7 +26,8 @@ library(plotly)
 
 (1-2 paragraphs): Brief introduction to the dataset. You may repeat some of the information about the dataset provided in the introduction to the dataset on the TidyTuesday repository, paraphrasing on your own terms. Imagine that your project is a standalone document and the grader has no prior knowledge of the dataset.
 
-## Question 1: Title that relates to the question you're answering
+## Question 1: How does a baker’s age and their performance in the technical challenges correlate to the total number of episodes they appear in/how many episodes they last for?
+
 
 ### Introduction
 
@@ -105,12 +106,11 @@ ggplotly(plot2)
 
 (1-3 paragraphs): In the Discussion section, interpret the results of your analysis. Identify any trends revealed (or not revealed) by the plots. Speculate about why the data looks the way it does.
 
-## Question 2: Effects on Viewership
+## Question 2: How do the different characteristics of each season and the progression of episodes within each season influence the show’s viewership?
 
 ```{r Q2-plot1}
 
-
-ratings <- ratings |>
+ratings_ppl <- ratings |>
   group_by(series)|>
   
   mutate(viewers_7day_mean = mean(viewers_7day)) |>
@@ -139,15 +139,17 @@ ggplot()+
   scale_color_manual(values = c("darkgreen", "darkblue", "darkred"))+
   geom_rect(data = format, 
     aes(xmin = box_min, xmax = box_max,
-        ymin = 0, ymax = 15.9,
+        ymin = 0, ymax = Inf,
         fill = channel_f, y = NULL, x = NULL))+
-  geom_point(data = ratings, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 3)+
+  #geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 3)+
+  geom_bar(data = ratings_ppl, aes( x = factor(series), y = viewers_7day_mean, fill = presenters),stat="identity", width=.75)+
   theme_minimal()+
   labs(
     title = "Number of Viewers across Series",
     x = "Series",
     y = "Mean 7 Day Viewership (by millions)",
-    fill = "Channels"
+    fill = "Channels",
+    color = "Presenters"
   )
 
 ```
@@ -191,11 +193,18 @@ ggplot(new_ratings, aes(x=viewers_7day, y=episode)) +
 
 (1-2 paragraphs): Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you're interested in this question.
 
---> One of the most objective measures of a TV show or Movie's success is the number of viewers. As such, we decided to investigate how changes in format and platform impact the viewership as well as how viewership changes throughout seasons. In order to properly answer these questions we drew on data from Wikipedia about the different channels, hosts, and judges, adding them to the ratings dataset as `presenters`, `judges`, and `channel` respectively. 
+--> One of the most objective measures of a TV show or Movie's success is the number of viewers. As such, we decided to investigate how changes in format and platform impact the viewership as well as how viewership changes throughout seasons. In order to properly answer these questions we drew on data from Wikipedia(https://en.wikipedia.org/wiki/The_Great_British_Bake_Off) about the different channels, hosts, and judges, adding them to the ratings_ppl dataset as `presenters`, `judges`, and `channel` respectively. We also use the group_by and mutate functions to find the mean 7-day viewership for across each season. 
+
+
 
 ### Approach
 
 (1-2 paragraphs): Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g.boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
+
+--> In order to compare the viewership distribution based on the presenters and network the show was on (which vary by season), we will plot the mean 7-day viewership for each season in relation to multiple different variables. The 7-day viewership gives an understanding of how many fans of the show are watching the show regularly. The first graph will plot mean viewership alongside visual prompts which show changes in channels and presenters so that it is easily seen how those changes can potentially effect viewership. 
+
+The second graph will explore how viewership changes throughout the season... SAAD ADD HERE
+
 
 ### Analysis
 
@@ -204,3 +213,5 @@ ggplot(new_ratings, aes(x=viewers_7day, y=episode)) +
 ### Discussion
 
 (1-3 paragraphs): In the Discussion section, interpret the results of your analysis. Identify any trends revealed (or not revealed) by the plots. Speculate about why the data looks the way it does.
+
+--> The first graph shows how changes in the Channels and Presenters can both positively and negatively effect a shows viewership. When the show switches from BBC Two from BBC one, viewership continues its upward trend at an even greater rate. However, after season seven when the show switches channels and presenters, viewership not only drops dramatically but also sits stagnant. 
