@@ -72,7 +72,7 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom,
   geom_smooth(aes(x = technical_bottom, color = "# of Bottom 3 Appearances"),
               se = FALSE, method = "lm") +
   geom_point(aes(x = technical_top3, text = baker_stats), shape = 16,
-             color = "#51A186") +
+             color = "#5ec962") +
   geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"),
               se = FALSE, method = "lm") +
   facet_wrap(~ factor(age_generation, levels = c("Baby Boomers", "Gen X", 
@@ -82,15 +82,15 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom,
   labs(
     y = "Percentage of Episodes Appeared In",
     x = "Number of Times Appearing in Technial Top or Bottom 3",
-    title = "Episode Appearances 
-    vs. Technical Challenge Top/Bottom 3 Performance",
+    title =
+      "Episode Appearances vs. Technical Challenge Ranking Frequency",
     subtitle = "By Age Generation of Bakers from Great British Baking Show"
   ) +
   scale_color_manual(
     name = NULL,
     breaks = c("# of Bottom 3 Appearances", "# of Top 3 Appearances"),
     values = c("# of Bottom 3 Appearances" = "#3F195E", 
-               "# of Top 3 Appearances" = "#51A186")
+               "# of Top 3 Appearances" = "#5ec962")
   ) +
   theme_minimal()
 
@@ -102,11 +102,15 @@ ggplotly(plot1) |>
 plot2 <- ggplot(bakers, aes(x = technical_lowest, 
                             y = percent_episodes_appeared)) +
   geom_point(shape = 1, color = "#3F195E", aes(text = baker_stats)) +
-  geom_smooth(aes(x = technical_lowest, color = "# of Last Places"),
+  geom_smooth(aes(x = technical_lowest, color = "Lowest Technical Score"),
               se = FALSE, method = "lm") +
-  geom_point(aes(x = technical_winner, text = baker_stats), shape = 16, 
-             color = "#51A186") +
-  geom_smooth(aes(x = technical_winner, color = "# of First Places"), 
+  geom_point(aes(x = technical_highest, text = baker_stats), shape = 16, 
+             color = "#5ec962") +
+  geom_smooth(aes(x = technical_highest, color = "Highest Technical Score"), 
+              se = FALSE, method = "lm") +
+  geom_point(aes(x = technical_median, text = baker_stats), shape = 10, 
+             color = "#21918c") +
+  geom_smooth(aes(x = technical_median, color = "Median Technical Score"), 
               se = FALSE, method = "lm") +
   facet_wrap(~ factor(age_generation, levels = c("Baby Boomers",
                                                  "Gen X", "Millenials", 
@@ -115,13 +119,16 @@ plot2 <- ggplot(bakers, aes(x = technical_lowest,
   labs(
     y = "Percentage of Episodes Appeared In",
     x = "Number of Times Appearing in Technial Top or Bottom 3",
-    title = "Episode Appearances vs. Technical Challenge Wins & Losses",
+    title = "Episode Appearances vs. Technical Challenge Ranking Extrema",
     subtitle = "By Age Generation of Bakers from Great British Baking Show"
   ) +
   scale_color_manual(
     name = NULL,
-    breaks = c("# of Last Places", "# of First Places"),
-    values = c("# of Last Places" = "#3F195E", "# of First Places" = "#51A186")
+    breaks = c("Lowest Technical Score", "Highest Technical Score",
+               "Median Technical Score"),
+    values = c("Lowest Technical Score" = "#3F195E",
+               "Highest Technical Score" = "#5ec962",
+               "Median Technical Score" = "#21918c")
   ) +
   theme_minimal()
 
