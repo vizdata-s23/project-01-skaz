@@ -20,6 +20,7 @@ library(tidyverse)
 library(bakeoff)
 library(lubridate)
 library(plotly)
+library(magrittr)
 ```
 
 ## Introduction
@@ -58,14 +59,12 @@ bakers <- bakers |>
   mutate_if(is.numeric, round, digits = 1)
 ```
 
-text = stats
-
-```{r first-plot}
+```{r first-plot, fig.height = 8, fig.width = 11}
 plot1 <- ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)) +
-  geom_point(shape = 1, color = "red",aes(text = baker_stats)) +
-  geom_smooth(aes(x = technical_bottom, color = "# of Bottom 3 Appearances"), se= FALSE) +
-  geom_point(aes(x = technical_top3, text = baker_stats), shape = 16, color = "darkgreen") +
-  geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"), se = FALSE) +
+  geom_point(shape = 1, color = "#3F195E",aes(text = baker_stats)) +
+  geom_smooth(aes(x = technical_bottom, color = "# of Bottom 3 Appearances"), se= FALSE, method = "lm") +
+  geom_point(aes(x = technical_top3, text = baker_stats), shape = 16, color = "#51A186") +
+  geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"), se = FALSE, method = "lm") +
   facet_wrap(~factor(age_generation, levels = c("Baby Boomers", "Gen X", "Millenials", "Silent Generation", "Gen Z"))) +
   labs(y = "Percentage of Episodes Appeared In",
        x = "Number of Times Appearing in Technial Top or Bottom 3",
@@ -73,31 +72,31 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom, y = percent_episodes_appeared)
        subtitle = "By Age Generation of Bakers from Great British Baking Show") +
   scale_color_manual(name = NULL,
     breaks=c('# of Bottom 3 Appearances', '# of Top 3 Appearances'),
-                     values=c('# of Bottom 3 Appearances'='red', '# of Top 3 Appearances'='darkgreen')) +
-  theme_bw() +
-  theme(legend.position = c(0.85, 0.275))
+                     values=c('# of Bottom 3 Appearances'='#3F195E', '# of Top 3 Appearances'='#51A186')) +
+  theme_minimal()
 
-ggplotly(plot1)
+ggplotly(plot1) |>
+  layout(legend = list(orientation = "v", x = .65, y = 0.15))
 ```
 
-```{r second-plot}
+```{r second-plot, fig.height = 8, fig.width = 11}
 plot2 <- ggplot(bakers, aes(x = technical_lowest, y = percent_episodes_appeared)) +
-  geom_point(shape = 1, color = "red",aes(text = baker_stats)) +
-  geom_smooth(aes(x = technical_lowest, color = "# of Bottom Appearances"), se= FALSE) +
-  geom_point(aes(x = technical_highest, text = baker_stats), shape = 16, color = "darkgreen") +
-  geom_smooth(aes(x = technical_highest, color = "# of Top Appearances"), se = FALSE) +
+  geom_point(shape = 1, color = "#3F195E",aes(text = baker_stats)) +
+  geom_smooth(aes(x = technical_lowest, color = "# of Last Places"), se= FALSE, method = "lm") +
+  geom_point(aes(x = technical_highest, text = baker_stats), shape = 16, color = "#51A186") +
+  geom_smooth(aes(x = technical_highest, color = "# of First Places"), se = FALSE, method = "lm") +
   facet_wrap(~factor(age_generation, levels = c("Baby Boomers", "Gen X", "Millenials", "Silent Generation", "Gen Z"))) +
   labs(y = "Percentage of Episodes Appeared In",
        x = "Number of Times Appearing in Technial Top or Bottom 3",
-       title = "Episode Appearances vs. Top/Bottom Performance",
+       title = "Episode Appearances vs. Technical Challenge Wins & Losses",
        subtitle = "By Age Generation of Bakers from Great British Baking Show") +
   scale_color_manual(name = NULL,
-    breaks=c('# of Bottom Appearances', '# of Top Appearances'),
-                     values=c('# of Bottom Appearances'='red', '# of Top Appearances'='darkgreen')) +
-  theme_bw() +
-  theme(legend.position = c(0.85, 0.275))
+    breaks=c('# of Last Places', '# of First Places'),
+                     values=c('# of Last Places'='#3F195E', '# of First Places'='#51A186')) +
+  theme_minimal()
 
-ggplotly(plot2)
+ggplotly(plot2) |>
+  layout(legend = list(orientation = "v", x = .7, y = 0.15))
 ```
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
