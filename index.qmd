@@ -1,5 +1,5 @@
 ---
-title: "Project title"
+title: "The Great British Bakeoff"
 subtitle: "STA/ISS 313 - Project 1"
 author: "SKAZ"
 format: html
@@ -61,7 +61,8 @@ The variables we plan on using are: `percent_episodes_appeared`, `technical_bott
 
 ### Introduction
 
-(1-2 paragraphs): Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you're interested in this question.
+(1-2 paragraphs): 
+The main component of The Great British Baking Show is the technical challenges. We are interested in exploring if placing in a technical challenges affects the number of episodes a contestant appears in. We will also explore how age plays a role in this correlation. We will use the bakers data set and the variables `technical_top3`, `technical_bottom`, `percent_episodes_appeared`, `technical_lowest`, `technical_highest`, and `technical_median`. Additionally, we mutated to create a variable named `age_generation` that we will use to facet by generation. 
 
 ### Approach
 
