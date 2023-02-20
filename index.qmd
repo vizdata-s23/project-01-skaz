@@ -114,7 +114,7 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom,
                                                  "Gen Z"))) +
   labs(
     y = "Percentage of Episodes Appeared In",
-    x = "Number of Times Appearing in Technial Top or Bottom 3",
+    x = "Number of Times Appearing in Technical Top or Bottom 3",
     title =
       "Episode Appearances vs. Technical Challenge Ranking Frequency",
     subtitle = "By Age Generation of Bakers from Great British Baking Show"
@@ -211,7 +211,8 @@ ggplot()+
         ymin = 0, ymax = Inf,
         fill = channel_f, y = NULL, x = NULL))+
   #geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 3)+
-  geom_bar(data = ratings_ppl, aes( x = factor(series), y = viewers_7day_mean, fill = presenters),stat="identity", width=.75)+
+  geom_point(data = ratings_ppl, aes( x = factor(series), y = viewers_7day_mean, fill = presenters),stat="identity", size=7)+
+  geom_segment(data = ratings_ppl,aes(x=series, xend = series, y = 0, yend = viewers_7day_mean, color = judges), linewidth = 6)+
   theme_minimal()+
   labs(
     title = "Number of Viewers across Series",
