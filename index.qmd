@@ -22,16 +22,40 @@ library(lubridate)
 library(plotly)
 library(magrittr)
 library(ggpmisc)
+library(dplyr)
+library(ggridges)
+library(scales)
+
+```
+
+```{r setup}
+
+# set theme for ggplot2
+ggplot2::theme_set(ggplot2::theme_minimal(base_size = 14))
+
+# set width of code output
+options(width = 65)
+
+# set figure parameters for knitr
+knitr::opts_chunk$set(
+  fig.width = 7,        # 7" width
+  fig.asp = 0.618,      # the golden ratio
+  fig.retina = 3,       # dpi multiplier for displaying HTML output on retina
+  fig.align = "center", # center align figures
+  dpi = 300             # higher dpi, sharper image
+)
+
 ```
 
 ## Introduction
 
 (1-2 paragraphs): Brief introduction to the dataset. You may repeat some of the information about the dataset provided in the introduction to the dataset on the TidyTuesday repository, paraphrasing on your own terms. Imagine that your project is a standalone document and the grader has no prior knowledge of the dataset.
 
-Our dataset comes from TidyTuesday’s October 25th challenge; it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. All of the data is derived from episodes of the acclaimed reality TV show “The Great British Bakeoff,” which - over the course of each of its ten seasons - pits bakers from around England against each other in a series of technical (testing the acuity of one’s refined baking skills) and creative challenges. As fans of the show, this dataset jumped out at us right away, but what really sealed the deal in our decision to use this dataset is how diverse its vast array of both categorical and and numeric variables is.
+Our dataset comes from TidyTuesday's October 25th challenge; it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. All of the data is derived from episodes of the acclaimed reality TV show "The Great British Bakeoff," which - over the course of each of its ten seasons - pits bakers from around England against each other in a series of technical (testing the acuity of one's refined baking skills) and creative challenges. As fans of the show, this dataset jumped out at us right away, but what really sealed the deal in our decision to use this dataset is how diverse its vast array of both categorical and and numeric variables is.
 
-The dataset includes 4 dataframes: `bakers`, `ratings`, `challenges`, and  `episodes`.  Bakers has 120 rows, each representing an individual baker and 24 columns. Ratings has 94 rows, each representing an episode, and 11 variables such as the ratings and the original airdates in the US and the UK. Challenges has details about the three types of challenges (signature, technical, and showstopper) as well as the performance of each baker (star baker, eliminated). It has 1136 rows, each representing a baker per episode, and 7 variables. As for episodes, it has 94 rows and 10 variables. Each row represents an episode and the variables describe different attributes of the episode like the number of  bakers that appeared in it, the name of eliminated bakers. The primary variables we plan on using are: `episodes_appeared``, `bottom_three`, `top_three`, `technical_lowest`, `technical_highest`, `technical_median`,  `season`, `age`, `viewers_7day`, `viewers_28day`, `uk_airdate`, and `bakers_out`.
+The dataset includes 4 dataframes: `bakers`, `ratings`, `challenges`, and `episodes`. Bakers has 120 rows, each representing an individual baker and 24 columns. Ratings has 94 rows, each representing an episode, and 11 variables such as the ratings and the original airdates in the US and the UK. Challenges has details about the three types of challenges (signature, technical, and showstopper) as well as the performance of each baker (star baker, eliminated). It has 1136 rows, each representing a baker per episode, and 7 variables. As for episodes, it has 94 rows and 10 variables. Each row represents an episode and the variables describe different attributes of the episode like the number of bakers that appeared in it, the name of eliminated bakers.
 
+The variables we plan on using are: `percent_episodes_appeared`, `technical_bottom`, `technical_top3`, `series`, `age`, `viewers_7day`, `viewers_28day`, `uk_airdate`, and `bakers_out`. Respectively, these variables represent the number of episodes in a given series/season in which a given baker appeared out of all episodes aired in that series/season, the number of times a given baker was in the bottom 3 on the technical challenge, the season number (1-10), the age in years in the first episode appeared, the number of viewers in millions within a 7-day window from airdate, the number of viewers in millions within a 28-day window from airdate, the original airdate of an episode in the UK, and the number of bakers were either eliminated, left at will, or left due to illness in that episode.
 
 ## Question 1: How does a baker's age and their performance in the technical challenges correlate to the total number of episodes they appear in/how many episodes they last for?
 
@@ -39,14 +63,11 @@ The dataset includes 4 dataframes: `bakers`, `ratings`, `challenges`, and  `epis
 
 (1-2 paragraphs): Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you're interested in this question.
 
-
-
 ### Approach
 
 (1-2 paragraphs): Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g. boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
 
-WILL CONTINUE LATER
-To answer this question, we’ve chosen to use two scatter plot graphs with linear trend lines and with `percent_episodes_appeared` on the y-axis as our predicted variable. We’ve opted to use `percent_episodes_appeared` as opposed to `total_episodes_appeared` because the number of episodes in each season varies, which would change the significance of how many episodes a person is in based on the season (for example, being in 8 episodes of season 2 would imply making it all the way to the finale, whereas being in 8 episodes of season 3 would only imply making it to the quarter-finals). Because our question seeks to understand how variation in age and technical challenge performance correlates to/helps predict longevity of show appearances, it seemed most logical to plot the percentage of these appearances on the y-axis for both graphs. We’ve chosen to use scatter plots because we wanted each data point to represent a specific baker. This format not only allows us to enable the ggplotly feature (such that people can see each bakers specific age, occupation, and hometown if they were to want to further investigate trends in these demographics), but we also believe it is the most efficient way to plot a correlation between two variables. The combination of the scatter plot and the trend lines makes it so that the audience can view any potential outliers in the data and peruse specific data points’ demographics with ggplotly while still having a clear means of seeing the trends in the data via the lines. The high R-values of our linear regressions also demonstrate how effectively the linear model fits our data set. (https://stackoverflow.com/questions/7549694/add-regression-line-equation-and-r2-on-graph )
+WILL CONTINUE LATER To answer this question, we've chosen to use two scatter plot graphs with linear trend lines and with `percent_episodes_appeared` on the y-axis as our predicted variable. We've opted to use `percent_episodes_appeared` as opposed to `total_episodes_appeared` because the number of episodes in each season varies, which would change the significance of how many episodes a person is in based on the season (for example, being in 8 episodes of season 2 would imply making it all the way to the finale, whereas being in 8 episodes of season 3 would only imply making it to the quarter-finals). Because our question seeks to understand how variation in age and technical challenge performance correlates to/helps predict longevity of show appearances, it seemed most logical to plot the percentage of these appearances on the y-axis for both graphs. We've chosen to use scatter plots because we wanted each data point to represent a specific baker. This format not only allows us to enable the ggplotly feature (such that people can see each bakers specific age, occupation, and hometown if they were to want to further investigate trends in these demographics), but we also believe it is the most efficient way to plot a correlation between two variables. The combination of the scatter plot and the trend lines makes it so that the audience can view any potential outliers in the data and peruse specific data points' demographics with ggplotly while still having a clear means of seeing the trends in the data via the lines. The high R-values of our linear regressions also demonstrate how effectively the linear model fits our data set. (https://stackoverflow.com/questions/7549694/add-regression-line-equation-and-r2-on-graph )
 
 ### Analysis
 
@@ -201,35 +222,39 @@ ggplot()+
 
 ```
 
-```{r Q2-plot2}
-
-library(tidyverse)
-library(bakeoff)
-library(dplyr)
-library(ggridges)
-library(scales)
+```{r Q2-data-wrangling}
 
 new_ratings <-
   ratings |>
   mutate(
     episode = as.factor(episode),
     series = as.factor(series))
+  
 
-#per_episode <-
-#  ratings |>
-#  group_by(episode) |>
-#  mutate(episode_mean = mean(viewers_7day))
 
-ggplot(new_ratings, aes(x=viewers_7day, y=episode)) +
-  geom_density_ridges_gradient(aes(fill=episode), scale=1, rel_min_height=0.01, show.legend = FALSE) +
+new <- new_ratings |>
+  mutate(num_series = as.numeric(series)) |>
+  mutate(new_series = case_when(
+    num_series <= 4 ~ "BBC Two", 
+    num_series <= 7 ~ "BBC One", 
+    num_series >= 8 ~ "Channel 4"))
+
+new$new_series <- factor(new$new_series, levels=c("BBC Two", "BBC One", "Channel 4"))
+
+```
+
+```{r Q2-plot2}
+
+ggplot(new, aes(x=viewers_7day, y=episode, fill=new_series)) +
+  geom_density_ridges_gradient(scale=1, rel_min_height=0.01, show.legend = TRUE) +
   geom_vline(aes(xintercept=median(viewers_7day)))+
-#  geom_point(data=per_episode, aes(x=episode_mean, y=episode))+
-#  geom_line(data=per_episode, aes(x=episode_mean, y=episode))+
   annotate("text", x=8.6, y=5.9, label="Median", angle=90, fontface="bold")+
   scale_fill_bakeoff(palette="showstopper")+
+  guides(fill=guide_legend("Channel"))+
   labs(x= "Viewers (in Millions)",
        y= "Episode Number",
        title= "Ridge densities of number of viewers in 7-day period per episode",
+       subtitle= "Split by broadcasting channel",
        caption= "Source: TidyTuesday (October 25th, 2022)")+
   theme_minimal()
 
@@ -240,7 +265,7 @@ ggplot(new_ratings, aes(x=viewers_7day, y=episode)) +
 
 (1-2 paragraphs): Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you're interested in this question.
 
---\> One of the most objective measures of a TV show or Movie's success is the number of viewers. As such, we decided to investigate how changes in format and platform impact the viewership as well as how viewership changes throughout seasons. In order to properly answer these questions we drew on data from Wikipedia(https://en.wikipedia.org/wiki/The_Great_British_Bake_Off) about the different channels, hosts, and judges, adding them to the ratings_ppl dataset as `presenters`, `judges`, and `channel` respectively. We also use the group_by and mutate functions to find the mean 7-day viewership for across each season.
+--\> One of the most objective measures of a TV show or movie's success is the number of viewers. As such, we decided to investigate how changes in format and platform impact the viewership as well as how viewership changes throughout seasons. In order to properly answer these questions we drew on data from [Wikipedia](https://en.wikipedia.org/wiki/The_Great_British_Bake_Off) about the different channels, hosts, and judges, adding them to the ratings_ppl dataset as `presenters`, `judges`, and `channel` respectively. We also use the group_by and mutate functions to find the mean 7-day viewership for across each season.
 
 ### Approach
 
@@ -248,14 +273,18 @@ ggplot(new_ratings, aes(x=viewers_7day, y=episode)) +
 
 --\> In order to compare the viewership distribution based on the presenters and network the show was on (which vary by season), we will plot the mean 7-day viewership for each season in relation to multiple different variables. The 7-day viewership gives an understanding of how many fans of the show are watching the show regularly. The first graph will plot mean viewership alongside visual prompts which show changes in channels and presenters so that it is easily seen how those changes can potentially effect viewership.
 
-The second graph will explore how viewership changes throughout the season... SAAD ADD HERE
+The second graph will explore how viewership changes throughout seasons. To that end, we use density ridges to plot the densities of the 7-day viewership for each episode across seasons. Additionally, we fill our density ridges with colors representing the network on which the season was broadcasted. This not only gives us insights into the impact of the broadcaster on the viewership but also serves as an indicator of the season number (Seasons 1-4 were on BBC Two, 5-7 on BBC One, and 8-10 on Channel 4)
 
 ### Analysis
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
 
+NEED TO MOVE CODE BLOCKS HERE
+
 ### Discussion
 
 (1-3 paragraphs): In the Discussion section, interpret the results of your analysis. Identify any trends revealed (or not revealed) by the plots. Speculate about why the data looks the way it does.
 
---\> The first graph shows how changes in the Channels and Presenters can both positively and negatively effect a shows viewership. When the show switches from BBC Two from BBC one, viewership continues its upward trend at an even greater rate. However, after season seven when the show switches channels and presenters, viewership not only drops dramatically but also sits stagnant.
+--\> The first graph shows how changes in the Channels and Presenters can both positively and negatively affect a show's viewership. When the show switches from BBC Two to BBC One, viewership continues its upward trend at an even greater rate. However, after season seven when the show switches channels and presenters, viewership not only drops dramatically but also sits stagnant.
+
+-\> Looking at the second plot, we can see that the higher we are, the more the ridges go to the left. That is, the further we are in the season, the higher the 7-day viewership. This can be expected since more people are attracted to the last few episodes leading to the finale. We also notice that the first episode has a high viewership compared to the episodes in the middle of the season. This is also expected since people usually like to watch the first episode of the season to get a sense of the bakers, and the season's general vibe. It is normal that the viewership drops slightly after that episode, and picks up again towards the season's end. It is also obvious that the show has relatively low viewership density during its first 4 seasons (on BBC Two), but the density increased drastically for seasons 5 to 7 on BBC One. After the switch to Channel 4, the density decreased again, still beating that of the first four seasons, and was mostly centered around the overall median 7-day viewership. The effect described earlier of early excitement, stagnation, then late excitement during the season is very visible looking at the Channel 4 densities, which almost form a crescent shape, with the tips being during the first and last episodes.
