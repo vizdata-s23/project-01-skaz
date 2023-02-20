@@ -1,5 +1,5 @@
 ---
-title: "The Great British Bakeoff"
+title: "Project title"
 subtitle: "STA/ISS 313 - Project 1"
 author: "SKAZ"
 format: html
@@ -51,7 +51,7 @@ knitr::opts_chunk$set(
 
 (1-2 paragraphs): Brief introduction to the dataset. You may repeat some of the information about the dataset provided in the introduction to the dataset on the TidyTuesday repository, paraphrasing on your own terms. Imagine that your project is a standalone document and the grader has no prior knowledge of the dataset.
 
-Our dataset comes from TidyTuesday's October 25th challenge; it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. All of the data is derived from episodes of the acclaimed reality TV show "The Great British Bakeoff," which - over the course of each of its ten seasons - pits bakers from around England against each other in a series of technical (testing the acuity of one's refined baking skills) and creative challenges. As fans of the show, this dataset jumped out at us right away, but what really sealed the deal in our decision to use this dataset is how diverse its vast array of both categorical and and numeric variables is.
+Our dataset comes from TidyTuesday's October 25th challenge; it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. All of the data is derived from the first ten seasons of the acclaimed reality TV show "The Great British Bakeoff," which - over the course of each of its ten seasons - pits bakers from around England against each other in a series of technical (testing the acuity of one's refined baking skills) and creative challenges. As fans of the show, this dataset jumped out at us right away, but what really sealed the deal in our decision to use this dataset is how diverse its vast array of both categorical and and numeric variables is.
 
 The dataset includes 4 dataframes: `bakers`, `ratings`, `challenges`, and `episodes`. Bakers has 120 rows, each representing an individual baker and 24 columns. Ratings has 94 rows, each representing an episode, and 11 variables such as the ratings and the original airdates in the US and the UK. Challenges has details about the three types of challenges (signature, technical, and showstopper) as well as the performance of each baker (star baker, eliminated). It has 1136 rows, each representing a baker per episode, and 7 variables. As for episodes, it has 94 rows and 10 variables. Each row represents an episode and the variables describe different attributes of the episode like the number of bakers that appeared in it, the name of eliminated bakers.
 
@@ -61,8 +61,7 @@ The variables we plan on using are: `percent_episodes_appeared`, `technical_bott
 
 ### Introduction
 
-(1-2 paragraphs): 
-The main component of The Great British Baking Show is the technical challenges. We are interested in exploring if placing in a technical challenges affects the number of episodes a contestant appears in. We will also explore how age plays a role in this correlation. We will use the bakers data set and the variables `technical_top3`, `technical_bottom`, `percent_episodes_appeared`, `technical_lowest`, `technical_highest`, and `technical_median`. Additionally, we mutated to create a variable named `age_generation` that we will use to facet by generation. 
+(1-2 paragraphs): Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you're interested in this question.
 
 ### Approach
 
@@ -114,7 +113,7 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom,
                                                  "Gen Z"))) +
   labs(
     y = "Percentage of Episodes Appeared In",
-    x = "Number of Times Appearing in Technical Top or Bottom 3",
+    x = "Number of Times Appearing in Technial Top or Bottom 3",
     title =
       "Episode Appearances vs. Technical Challenge Ranking Frequency",
     subtitle = "By Age Generation of Bakers from Great British Baking Show"
@@ -211,8 +210,7 @@ ggplot()+
         ymin = 0, ymax = Inf,
         fill = channel_f, y = NULL, x = NULL))+
   #geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 3)+
-  geom_point(data = ratings_ppl, aes( x = factor(series), y = viewers_7day_mean, fill = presenters),stat="identity", size=7)+
-  geom_segment(data = ratings_ppl,aes(x=series, xend = series, y = 0, yend = viewers_7day_mean, color = judges), linewidth = 6)+
+  geom_bar(data = ratings_ppl, aes( x = factor(series), y = viewers_7day_mean, fill = presenters),stat="identity", width=.75)+
   theme_minimal()+
   labs(
     title = "Number of Viewers across Series",
@@ -242,17 +240,27 @@ new <- new_ratings |>
     num_series >= 8 ~ "Channel 4"))
 
 new$new_series <- factor(new$new_series, levels=c("BBC Two", "BBC One", "Channel 4"))
+```
 
+```{r}
+median_7day_ep <-
+  new |> 
+  group_by(episode) |>
+  summarize(median = median(viewers_7day)) |>
+  mutate(episode=as.numeric(episode))
 ```
 
 ```{r Q2-plot2}
 
-ggplot(new, aes(x=viewers_7day, y=episode, fill=new_series)) +
-  geom_density_ridges_gradient(scale=1, rel_min_height=0.01, show.legend = TRUE) +
-  geom_vline(aes(xintercept=median(viewers_7day)))+
-  annotate("text", x=8.6, y=5.9, label="Median", angle=90, fontface="bold")+
+ggplot(new) +
+  geom_density_ridges_gradient(aes(x=viewers_7day, y=episode, fill=new_series), scale=1, rel_min_height=0.01, show.legend = TRUE) +
+  geom_segment(data=median_7day_ep, aes(x=median, xend=median, y=episode, yend=episode+1), linetype="longdash", color="white", size=2)+
+  #annotate("text", x=8.6, y=5.9, label="Median", angle=90, fontface="bold")+
   scale_fill_bakeoff(palette="showstopper")+
   guides(fill=guide_legend("Channel"))+
+  scale_x_discrete(limits = c(0, 5, median(new$viewers_7day), 10, 15),
+    labels=c('0', '5', 'Overall \nMedian', '10', '15'))+
+  
   labs(x= "Viewers (in Millions)",
        y= "Episode Number",
        title= "Ridge densities of number of viewers in 7-day period per episode",
