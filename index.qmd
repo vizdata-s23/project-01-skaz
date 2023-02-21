@@ -96,26 +96,28 @@ bakers <- bakers |>
   mutate_if(is.numeric, round, digits = 1)
 ```
 
-```{r first-plot, fig.height = 8, fig.width = 11}
+```{r plot-1-question-1}
 bakers_lm_top <- bakers %>%
   group_by(age_generation) %>%
   nest() %>%
-  # Fit linear model
   mutate(Mod = map(data, ~lm(percent_episodes_appeared ~ technical_top3, data = .x))) %>%
-  # Get the R2
   mutate(R2 = map_dbl(Mod, ~round(summary(.x)$r.squared, 3))) 
-```
 
-```{r }
+bakers_lm_bottom <- bakers %>%
+  group_by(age_generation) %>%
+  nest() %>%
+  mutate(Mod = map(data, ~lm(percent_episodes_appeared ~ technical_bottom, data = .x))) %>%
+  mutate(R2 = map_dbl(Mod, ~round(summary(.x)$r.squared, 3))) 
+
 plot1 <- ggplot(bakers, aes(x = technical_bottom, 
                             y = percent_episodes_appeared)) +
   geom_smooth(aes(color = "# of Bottom 3 Appearances"),
               se = FALSE, method = "lm") +
   geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"),
               se = FALSE, method = "lm") +
-  geom_point(shape = 1, color = "#3F195E", aes(text = baker_stats)) +
+  geom_point(shape = 1, color = "#D56065", aes(text = baker_stats)) +
   geom_point(aes(x = technical_top3, text = baker_stats), shape = 16,
-             color = "#5ec962") +
+             color = "#4A55A4") +
   facet_wrap(~ factor(age_generation, levels = c("Baby Boomers", "Gen X", 
                                                  "Millenials",
                                                  "Silent Generation",
@@ -127,18 +129,20 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom,
       "Episode Appearances vs. Technical Challenge Ranking Frequency",
     subtitle = "By Age Generation of Bakers from Great British Baking Show"
   ) +
+    geom_text(x=1, y=110, aes(label = paste("R2 =", R2)),
+              data = bakers_lm_top, color = "#4A55A4", size = 3) +
+    geom_text(x=7, y=35, aes(label = paste("R2 =", R2)),
+              data = bakers_lm_bottom, color = "#D56065", size = 3) +
   scale_color_manual(
     name = NULL,
     breaks = c("# of Bottom 3 Appearances", "# of Top 3 Appearances"),
-    values = c("# of Bottom 3 Appearances" = "#3F195E", 
-               "# of Top 3 Appearances" = "#5ec962")
+    values = c("# of Bottom 3 Appearances" = "#D56065", 
+               "# of Top 3 Appearances" = "#4A55A4")
   ) +
-  theme_minimal() +
-  geom_text(x=1, y=110, aes(label = R2), data = bakers_lm_top)
-#annotate(geom="text", x=1, y=110, aes(label = paste(bakers_lm_top[1, 4]))) +
+  theme_minimal()
 
 ggplotly(plot1) |>
-  layout(legend = list(orientation = "v", x = .65, y = 0.15))
+  layout(legend = list(orientation = "v", x = .7, y = 0.15))
 ```
 
 ```{r score-type-data-wrangling}
@@ -148,15 +152,18 @@ bakers1 <- bakers |>
     names_to = "score_type"
   ) |>
   mutate(score_type = case_when(
-    score_type == "technical_highest" ~ "Technical Highest",
-    score_type == "technical_lowest" ~ "Technical Lowest",
-    score_type == "technical_median" ~ "Technical Median"
+    score_type == "technical_highest" ~ "Highest Ranking",
+    score_type == "technical_lowest" ~ "Lowest Ranking",
+    score_type == "technical_median" ~ "Median Ranking"
   )) |>
   rename(amount = value) |>
-  filter(age_generation != "Silent Generation") |>
-  filter(age_generation != "Gen Z")
+  filter(age_generation != "Silent Generation" & age_generation != "Gen Z")
 
-
+bakers_meds <- bakers1 |>
+  drop_na(amount) |>
+  group_by(age_generation, score_type)|>
+  summarize(median = median(amount))
+    
 ```
 
 ```{r plot-2-for-question-1}
@@ -165,54 +172,17 @@ ggplot(data = bakers1, aes(
   fill = age_generation
 )) +
   geom_boxplot() +
+  geom_text(data = bakers_meds, aes(x = median, y = age_generation, label = median, color = age_generation), size = 3, vjust = 5, fontface = "bold") +
   facet_wrap(~score_type) +
   theme(legend.position = "none") +
   scale_fill_bakeoff(palette = "showstopper") +
+  scale_color_bakeoff(palette = "showstopper") +
   labs(
-    y = NULL, x = "Respective Technical Challenge Ranking",
-    title = "Technical Challenge Ranking Extreme by Age Generation", 
-    caption = "Gen Z and Silent Generation not included 
-    \n due to small sample size (n= 4, n=1 respectively)"
+    y = NULL, x = "Technical Challenge Ranking",
+    title = "Technical Challenge Rankings by Age Generation", 
+    caption = "Gen Z and Silent Generation not included
+    due to small sample sizes (n= 4 & n=1 respectively)"
   )
-```
-
-
-```{r second-plot, fig.height = 8, fig.width = 11}
-plot2 <- ggplot(bakers, aes(x = technical_lowest, 
-                            y = percent_episodes_appeared)) +
-  geom_point(shape = 1, color = "#3F195E", aes(text = baker_stats)) +
-  geom_smooth(aes(x = technical_lowest, color = "Lowest Technical Score"),
-              se = FALSE, method = "lm") +
-  geom_point(aes(x = technical_highest, text = baker_stats), shape = 16, 
-             color = "#5ec962") +
-  geom_smooth(aes(x = technical_highest, color = "Highest Technical Score"), 
-              se = FALSE, method = "lm") +
-  geom_point(aes(x = technical_median, text = baker_stats), shape = 10, 
-             color = "#21918c") +
-  geom_smooth(aes(x = technical_median, color = "Median Technical Score"), 
-              se = FALSE, method = "lm") +
-  facet_wrap(~ factor(age_generation, levels = c("Baby Boomers",
-                                                 "Gen X", "Millenials", 
-                                                 "Silent Generation", 
-                                                 "Gen Z"))) +
-  labs(
-    y = "Percentage of Episodes Appeared In",
-    x = "Number of Times Appearing in Technial Top or Bottom 3",
-    title = "Episode Appearances vs. Technical Challenge Ranking Extrema",
-    subtitle = "By Age Generation of Bakers from Great British Baking Show"
-  ) +
-  scale_color_manual(
-    name = NULL,
-    breaks = c("Lowest Technical Score", "Highest Technical Score",
-               "Median Technical Score"),
-    values = c("Lowest Technical Score" = "#3F195E",
-               "Highest Technical Score" = "#5ec962",
-               "Median Technical Score" = "#21918c")
-  ) +
-  theme_minimal()
-
-ggplotly(plot2) |>
-  layout(legend = list(orientation = "v", x = .7, y = 0.15))
 ```
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
