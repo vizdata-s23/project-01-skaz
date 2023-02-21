@@ -141,6 +141,21 @@ ggplotly(plot1) |>
   layout(legend = list(orientation = "v", x = .65, y = 0.15))
 ```
 
+```{r score-type-data-wrangling}
+bakers1 <- bakers |>
+  pivot_longer(cols = c(technical_highest, technical_lowest, technical_median), names_to = "score_type") |>
+  mutate(score_type = case_when(score_type == "technical_highest" ~ "Technical Highest",
+                                score_type == "technical_lowest" ~ "Technical Lowest",
+                                score_type == "technical_median" ~ "Technical Median")) |>
+  rename(amount = value)
+```
+
+```{r}
+ggplot(data = bakers, aes(x = technical_highest, fill = age_generation)) +
+  geom_bar() +
+  geom_bar(aes(x = technical_lowest)) +
+  scale_fill_bakeoff(palette="showstopper")
+```
 
 
 ```{r second-plot, fig.height = 8, fig.width = 11}
