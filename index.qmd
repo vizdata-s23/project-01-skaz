@@ -25,7 +25,6 @@ library(ggpmisc)
 library(dplyr)
 library(ggridges)
 library(scales)
-
 ```
 
 ```{r setup}
@@ -67,7 +66,7 @@ The variables we plan on using are: `percent_episodes_appeared`, `technical_bott
 
 (1-2 paragraphs): Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g. boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
 
-WILL CONTINUE LATER To answer this question, we've chosen to use two scatter plot graphs with linear trend lines and with `percent_episodes_appeared` on the y-axis as our predicted variable. We've opted to use `percent_episodes_appeared` as opposed to `total_episodes_appeared` because the number of episodes in each season varies, which would change the significance of how many episodes a person is in based on the season (for example, being in 8 episodes of season 2 would imply making it all the way to the finale, whereas being in 8 episodes of season 3 would only imply making it to the quarter-finals). Because our question seeks to understand how variation in age and technical challenge performance correlates to/helps predict longevity of show appearances, it seemed most logical to plot the percentage of these appearances on the y-axis for both graphs. We've chosen to use scatter plots because we wanted each data point to represent a specific baker. This format not only allows us to enable the ggplotly feature (such that people can see each bakers specific age, occupation, and hometown if they were to want to further investigate trends in these demographics), but we also believe it is the most efficient way to plot a correlation between two variables. The combination of the scatter plot and the trend lines makes it so that the audience can view any potential outliers in the data and peruse specific data points' demographics with ggplotly while still having a clear means of seeing the trends in the data via the lines. The high R-values of our linear regressions also demonstrate how effectively the linear model fits our data set. (https://stackoverflow.com/questions/7549694/add-regression-line-equation-and-r2-on-graph )
+WILL CONTINUE LATER To answer this question, we've chosen to use two scatter plot graphs with linear trend lines and with `percent_episodes_appeared` on the y-axis as our predicted variable. We've opted to use `percent_episodes_appeared` as opposed to `total_episodes_appeared` because the number of episodes in each season varies, which would change the significance of how many episodes a person is in based on the season (for example, being in 8 episodes of season 2 would imply making it all the way to the finale, whereas being in 8 episodes of season 3 would only imply making it to the quarter-finals). Because our question seeks to understand how variation in age and technical challenge performance correlates to/helps predict longevity of show appearances, it seemed most logical to plot the percentage of these appearances on the y-axis for both graphs. We've chosen to use scatter plots because we wanted each data point to represent a specific baker. This format not only allows us to enable the ggplotly feature (such that people can see each bakers specific age, occupation, and hometown if they were to want to further investigate trends in these demographics), but we also believe it is the most efficient way to plot a correlation between two variables. The combination of the scatter plot and the trend lines makes it so that the audience can view any potential outliers in the data and peruse specific data points' demographics with ggplotly while still having a clear means of seeing the trends in the data via the lines. The high R-squared-values of our linear regressions also demonstrate how effectively the linear model fits our data set.
 
 ### Analysis
 
@@ -98,15 +97,25 @@ bakers <- bakers |>
 ```
 
 ```{r first-plot, fig.height = 8, fig.width = 11}
+bakers_lm_top <- bakers %>%
+  group_by(age_generation) %>%
+  nest() %>%
+  # Fit linear model
+  mutate(Mod = map(data, ~lm(percent_episodes_appeared ~ technical_top3, data = .x))) %>%
+  # Get the R2
+  mutate(R2 = map_dbl(Mod, ~round(summary(.x)$r.squared, 3))) 
+```
+
+```{r }
 plot1 <- ggplot(bakers, aes(x = technical_bottom, 
                             y = percent_episodes_appeared)) +
-  geom_point(shape = 1, color = "#3F195E", aes(text = baker_stats)) +
-  geom_smooth(aes(x = technical_bottom, color = "# of Bottom 3 Appearances"),
+  geom_smooth(aes(color = "# of Bottom 3 Appearances"),
               se = FALSE, method = "lm") +
-  geom_point(aes(x = technical_top3, text = baker_stats), shape = 16,
-             color = "#5ec962") +
   geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"),
               se = FALSE, method = "lm") +
+  geom_point(shape = 1, color = "#3F195E", aes(text = baker_stats)) +
+  geom_point(aes(x = technical_top3, text = baker_stats), shape = 16,
+             color = "#5ec962") +
   facet_wrap(~ factor(age_generation, levels = c("Baby Boomers", "Gen X", 
                                                  "Millenials",
                                                  "Silent Generation",
@@ -124,11 +133,15 @@ plot1 <- ggplot(bakers, aes(x = technical_bottom,
     values = c("# of Bottom 3 Appearances" = "#3F195E", 
                "# of Top 3 Appearances" = "#5ec962")
   ) +
-  theme_minimal()
+  theme_minimal() +
+  geom_text(x=1, y=110, aes(label = R2), data = bakers_lm_top)
+#annotate(geom="text", x=1, y=110, aes(label = paste(bakers_lm_top[1, 4]))) +
 
 ggplotly(plot1) |>
   layout(legend = list(orientation = "v", x = .65, y = 0.15))
 ```
+
+
 
 ```{r second-plot, fig.height = 8, fig.width = 11}
 plot2 <- ggplot(bakers, aes(x = technical_lowest, 
