@@ -314,7 +314,7 @@ scale_x_continuous(breaks = c(0, 5, overall_median, 10, 15),
        y= "Episode Number",
        title= "Ridge densities of number of viewers in 7-day period per episode",
        subtitle= "Split by broadcasting channel",
-       caption= "Gray lines represent the median viewership over all episodes\n The 10 episode count is not a perfect finale viewership estimate since S1 and S2 only have 6 and 8 episodes each")+
+       caption= "Gray lines represent the median viewership for each episode\n The 10 episode count is not a perfect finale viewership estimate since S1 and S2 only have 6 and 8 episodes each")+
   theme_minimal()
 
 
