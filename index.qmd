@@ -30,6 +30,7 @@ library(ggimage)
 library(png)
 library(grid)
 library(here)
+library(ggrepel)
 ```
 
 ```{r setup}
@@ -212,9 +213,7 @@ Based on the second visualization, we can see that, on average, Millennials tend
 
 ### Introduction
 
-(1-2 paragraphs): Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you're interested in this question.
-
---\> One of the most objective measures of a TV show or movie's success is the number of viewers. As such, we decided to investigate how changes in format and platform impact the viewership as well as how viewership changes throughout seasons. In order to properly answer these questions we drew on data from [Wikipedia](https://en.wikipedia.org/wiki/The_Great_British_Bake_Off) about the different hosts, judges, and channels adding them to the ratings_ppl dataset as `presenters`, `judges`, and `channel` respectively. We also use the group_by and mutate functions to find the mean 7-day viewership for across each season using the `series` and `viewers_7day` variables.
+One of the most objective measures of a TV show or movie's success is the number of viewers. As such, we decided to investigate how changes in format and platform impact the viewership as well as how viewership changes throughout seasons. In order to properly answer these questions we drew on data from [Wikipedia](https://en.wikipedia.org/wiki/The_Great_British_Bake_Off) about the different hosts, judges, and channels involved in the show throughout its run, adding them to the `ratings_ppl` dataset as `presenters`, `judges`, and `channel` variables respectively. We also use the group_by, mutate, and mean functions to find the mean 7-day viewership for each season. The 7-day viewership mean variable is our main indicator of the show's success.
 
 ### Approach
 
@@ -318,8 +317,6 @@ overall_median <- median(new$viewers_7day)
 ```
 
 ```{r Q2-plot2}
-library(ggrepel)
-
 
 ggplot(new) +
   geom_density_ridges_gradient(aes(x=viewers_7day, y=episode, fill=new_series), scale=1, rel_min_height=0.01, show.legend = TRUE) +
@@ -336,11 +333,10 @@ scale_x_continuous(breaks = c(0, 5, overall_median, 10, 15),
        caption= "Gray lines represent the median viewership over all episodes\n The 10 episode count is not a perfect finale viewership estimate since S1 and S2 only have 6 and 8 episodes each")+
   theme_minimal()
 
-
 ```
 
 ### Discussion
 
-The first graph shows how changes in the Channels and Presenters can both positively and negatively affect a show's viewership. When the show switches from BBC Two to BBC One, viewership continues its upward trend at an even greater rate, which makes sense provided that BBC One is a larger and more accessible network than BBC Two. However, after season seven when the show switches channels and presenters, viewership not only drops dramatically but also sits stagnant. Because [Channel 4 is entirely privately funded](https://www.channel4.com/corporate/about-4/operating-responsibly/freedom-information/frequently-asked-questions#:~:text=Unlike%20the%20BBC%2C%20Channel%204,4's%20dedicated%20advertising%20sales%20website), it makes sense that they would be a smaller network with a different (and seemingly less successful) marketing strategy. The largest trends seem to be correlated moreso with the channels than with the presenters of the show, which makes sense because none of the resenters are particularly large enough names to draw or dispel audiences based exclusively on their appearance in the show. However, one could explain the drop in Channel 4 viewership as a product of people's frustration with switching the presenters (from Sue Perkins & Mel Giedroyc to Noel Fielding and Sandi Toksvig) .
+The first graph shows how changes in the channels and, subsequently, presenters and judges can both positively and negatively affect a show's viewership. When the show switches from BBC Two to BBC One, viewership continues its upward trend at an even greater rate, which makes sense provided that BBC One is a larger and more accessible network than BBC Two, mirror the success as the show built a platform of fans. However, after season seven when the show switches channels causing a change in presenters and judges, viewership not only drops dramatically but also sits stagnant. Because [Channel 4 is entirely privately funded](https://www.channel4.com/corporate/about-4/operating-responsibly/freedom-information/frequently-asked-questions#:~:text=Unlike%20the%20BBC%2C%20Channel%204,4's%20dedicated%20advertising%20sales%20website), it makes sense that they would be a smaller network with a different (and seemingly less successful) marketing strategy. The largest trends seem to be correlated moreso with the channels than with the presenters and judges of the show, which makes sense because none of the presenters and judges are particularly large enough names to draw or dispel audiences based exclusively on their appearance in the show. However, one could explain the drop in Channel 4 viewership as a product of people's frustration with switching the presenters (from Sue Perkins & Mel Giedroyc to Noel Fielding and Sandi Toksvig), as well as the loss of Mary Berry as the second judge. These changes in the TV personalities caused the feel of the show to change, potentially adding to even further loss of viewership.
 
 Looking at the second plot, we can see that the higher we are, the more the ridges go to the left. That is, the further we are in the season, the higher the 7-day viewership. This can be expected since more people are attracted to the last few episodes leading to the finale. Notably, the first season only had 6 episodes and the second only had 8 (but every other season had 10), so the finale episode is not always episode 10. However, because such is the case for 8 of the 10 seasons, we still feel confident in our conclusion that viewership ramps up for and in anticipation of the season finale. We also notice that the first episode has a high viewership compared to the episodes in the middle of the season. This is also expected since people usually like to watch the first episode of the season to get a sense of the bakers, and the season's general vibe. It is normal that the viewership drops slightly after that episode, and picks up again towards the season's end. It is also obvious that the show has relatively low viewership density during its first 4 seasons (on BBC Two), but the viewership increased drastically for seasons 5 to 7 on BBC One. After the switch to Channel 4, the viewership decreased again, still beating that of the first four seasons, and was mostly centered around the overall median 7-day viewership. The effect described earlier of early excitement, stagnation, then late excitement during the season is very visible looking at the Channel 4 densities, which almost form a crescent shape, with the tips being during the first and last episodes.

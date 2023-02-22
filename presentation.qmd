@@ -1,7 +1,7 @@
 ---
-title: "Project title"
+title: "The Great British Visualisation"
 subtitle: "STA/ISS 313 - Spring 2023 - Project 1"
-author: "Team Name"
+author: "SKAZ"
 title-slide-attributes:
   data-background-image: images/watercolour_sys02_img34_teacup-ocean.jpg
   data-background-size: stretch
@@ -15,34 +15,159 @@ execute:
 ```{r}
 #| label: load-packages
 #| include: false
-
-# Add any additional packages you need to this chunk
-# Remove any packages from this list that you're not using
 library(tidyverse)
-library(tidymodels)
-library(palmerpenguins)
-library(gt)
+library(bakeoff)
+library(lubridate)
+library(plotly)
+library(magrittr)
+library(ggpmisc)
+library(dplyr)
+library(ggridges)
+library(scales)
+library(ggimage)
+library(png)
+library(grid)
+library(here)
+library(ggrepel)
 ```
 
 ```{r}
 #| label: setup
 #| include: false
 
-# For better figure resolution
+ggplot2::theme_set(ggplot2::theme_minimal(base_size = 14))
+
+# set width of code output
+options(width = 65)
+
+# set figure parameters for knitr
 knitr::opts_chunk$set(
-  fig.retina = 3, 
-  dpi = 300, 
-  fig.width = 6, 
-  fig.asp = 0.618, 
-  out.width = "70%"
-  )
+  fig.width = 7,        # 7" width
+  fig.asp = 0.618,      # the golden ratio
+  fig.retina = 3,       # dpi multiplier for displaying HTML output on retina
+  fig.align = "center", # center align figures
+  dpi = 300             # higher dpi, sharper image
+)
+
 ```
+
+## PLOT 1
+
+## PLOT 2
+
+## Number of Viewers Across Series
+
+```{r Question-2-Plot-1}
+
+ratings_ppl <- ratings |>
+  group_by(series)|>
+  
+  mutate(viewers_7day_mean = mean(viewers_7day)) |>
+  mutate(presenters = case_when(
+    series <=7 ~ "Sue Perkins & Mel Giedroyc",
+    series >=8 & series <=10 ~ "Noel Fielding & Sandi Toksvig"
+  ))|>
+  mutate(judges = case_when(
+    series <= 7 ~ "Paul Hollywood & Mary Berry",
+    series >= 8 ~ "Paul Hollywood & Prue Leith"
+  )) |>
+  mutate(channel = case_when(
+    series <= 4 ~ "BBC Two",
+    series >4 & series <8 ~ "BBC One", 
+    series >= 8 ~ "Channel 4"
+  ))
+
+ratings_ppl$presenters <- factor(ratings_ppl$presenters, levels=c("Sue Perkins & Mel Giedroyc", "Noel Fielding & Sandi Toksvig"))
+
+format <- tribble(
+  ~box_min, ~box_max, ~color_f,      ~channel_f,
+  0,        4.5,        "#005e70",   "BBC Two",
+  4.5,        7.5,        "#cb0b0a",   "BBC One",
+  7.5,        11,       "#01a7bd",   "Channel 4"
+  )
+
+
+bbc_two <- readPNG(here("images","BBC_Two_logo.png"))
+bbc_one <- readPNG(here("images","BBC_One_logo.png"))
+channel4 <- readPNG(here("images","Channel_4_logo.png"))
+
+two <- rasterGrob(bbc_two, interpolate=TRUE)
+one <- rasterGrob(bbc_one, interpolate=TRUE)
+four <- rasterGrob(channel4, interpolate=TRUE)
+
+
+ggplot(ratings_ppl, aes(x = series, y = viewers_7day_mean))+
+  geom_rect(data = format, aes(xmin = box_min, xmax = box_max,ymin = 0, ymax = Inf,fill = color_f, y = NULL, x = NULL))+
+  scale_fill_identity()+
+  geom_segment(data = ratings_ppl, aes(x = factor(series), xend = factor(series), y = 0, yend = viewers_7day_mean, linetype=judges), color = "white", size = 2)+
+  geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 7)+ 
+  annotation_custom(two, xmin=2, xmax=3, ymin=13, ymax=Inf) +
+  annotation_custom(one, xmin=5.5, xmax=6.5, ymin=13, ymax=Inf) +
+  annotation_custom(four, xmin=8.5, xmax=9.5, ymin=13, ymax=Inf) +
+  theme_minimal()+
+  scale_color_bakeoff(palette = "showstopper", direction = -1) +
+  labs(
+    title = "Number of Viewers across Series",
+    x = "Series",
+    y = "Mean 7 Day Viewership (by millions)",
+    fill = "Channels",
+    color = "Presenters",
+    linetype = "Judges"
+  )+
+  theme(legend.key = element_rect(fill = "lightgray"))
+
+```
+
+## Viewership throughout Episodes
 
 ```{r}
 #| label: load-data
 #| include: false
 
 # Load your data here
+
+new_ratings <-
+  ratings |>
+  mutate(
+    episode = as.factor(episode),
+    series = as.factor(series))
+
+
+new <- new_ratings |>
+  mutate(num_series = as.numeric(series)) |>
+  mutate(new_series = case_when(
+    num_series <= 4 ~ "BBC Two", 
+    num_series <= 7 ~ "BBC One", 
+    num_series >= 8 ~ "Channel 4"))
+
+new$new_series <- factor(new$new_series, levels=c("BBC Two", "BBC One", "Channel 4"))
+
+median_7day_ep <-
+  new |> 
+  group_by(episode) |>
+  summarize(median = median(viewers_7day)) |>
+  mutate(episode=as.numeric(episode))
+
+overall_median <- median(new$viewers_7day)
+#next code chunk --> ggplot
+```
+```{r}
+ggplot(new) +
+  geom_density_ridges_gradient(aes(x=viewers_7day, y=episode, fill=new_series), scale=1, rel_min_height=0.01, show.legend = TRUE) +
+  geom_segment(data=median_7day_ep, aes(x=median, xend=median, y=episode, yend=episode+1), color="#A2A6AC", size=2)+
+  #scale_fill_bakeoff(palette="showstopper")+
+  guides(fill=guide_legend("Channel"))+
+  scale_fill_manual(values=c("#005e70", "#cb0b0a", "#01a7bd"))+
+scale_x_continuous(breaks = c(0, 5, overall_median, 10, 15),
+                   labels = c('0', '5', 'Overall\nMedian', '10', '15')) +
+  labs(x= "Viewers (in Millions)",
+       y= "Episode Number",
+       title= "Ridge densities of number of viewers in 7-day period per episode",
+       subtitle= "Split by broadcasting channel",
+       caption= "Gray lines represent the median viewership over all episodes\n The 10 episode count is not a perfect finale viewership estimate since S1 and S2 only have 6 and 8 episodes each")+
+  theme_minimal()
+
+
 ```
 
 # Using Quarto for presentations
@@ -78,49 +203,9 @@ or text in two columns $^*$
 
 ## Code
 
-```{r}
-#| label: boring-regression
-
-# a boring regression
-model <- lm(dist ~ speed, data = cars)
-tidy(model)
-glance(model)
-```
 
 ## Plots
 
-```{r}
-#| label: recode-species
-#| echo: false
-
-# In this chunk I'm doing a bunch of analysis that I don't want to present 
-# in my slides. But I need the resulting data frame for a plot I want to present.
-
-penguins_modified <- penguins %>%
-  mutate(species = fct_other(species, keep = "Adelie"))
-```
-
-```{r}
-#| label: plot-penguins
-#| echo: false
-#| warning: false
-#| fig-alt: |
-#|   Body mass vs. flipper lenght of Palmer Penguins for species Adelie and all 
-#|   the others combined together. There is a relatively strong, positive 
-#|   relationship between the two variables. The Adelie penguins are clustered 
-#|   together but they don't exhibit a different trend than the rest of the 
-#|   penguins.
-
-# Uses modified penguins dataset from previous chunk
-# Play around with height and width until you're happy with the look
-
-ggplot(
-  penguins_modified, 
-  aes(x = flipper_length_mm, y = body_mass_g, color = species)
-  ) +
-  geom_point() + 
-  theme_minimal()
-```
 
 ## Plot and text
 
@@ -140,9 +225,6 @@ ggplot(
 # See how I changed out-width and fig-width from defaults
 # to make the figure bigger
 
-ggplot(penguins, aes(x = bill_length_mm, y = species, color = species)) +
-  geom_boxplot() +
-  theme_minimal()
 ```
 :::
 :::
@@ -156,7 +238,6 @@ If you want to generate a table, make sure it is in the HTML format (instead of 
 ```{r}
 #| label: penguins-table
 
-gt(head(penguins))
 ```
 
 ## Images
