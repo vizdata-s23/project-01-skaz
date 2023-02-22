@@ -51,9 +51,130 @@ knitr::opts_chunk$set(
 
 ```
 
-## PLOT 1
+```{r age-data-wrangling }
+#| include: false
+bakers <- bakers |>
+  separate(col = first_date_appeared, remove = FALSE, sep = "-", 
+           into = "first_year_appeared")
 
-## PLOT 2
+bakers <- bakers |>
+  mutate(first_year_appeared = case_when(
+    series == 9 ~ "2018",
+    series == 10 ~ "2019",
+    TRUE ~ first_year_appeared
+  ))
+bakers <- bakers |>
+  mutate(birth_year = as.numeric(first_year_appeared) - age) |>
+  mutate(age_generation = case_when(
+    birth_year >= 1928 & birth_year <= 1945 ~ "Silent Generation",
+    birth_year >= 1946 & birth_year <= 1964 ~ "Baby Boomers",
+    birth_year >= 1965 & birth_year <= 1980 ~ "Gen X",
+    birth_year >= 1981 & birth_year <= 1996 ~ "Millennials",
+    birth_year >= 1997 & birth_year <= 2012 ~ "Gen Z"
+  )) |>
+  mutate(baker_stats = paste(baker_full, "\n Birth Year:", birth_year, 
+                             "\n Age:", age, " \n Hometown:", hometown, 
+                             "\n Occupation:", occupation)) |>
+  mutate_if(is.numeric, round, digits = 1)
+```
+
+## Technical Challenge Ranking and Episode Appearances 
+
+```{r Question-1-Plot-1}
+bakers_lm_top <- bakers %>%
+  group_by(age_generation) %>%
+  nest() %>%
+  mutate(Mod = map(data, ~lm(percent_episodes_appeared ~ technical_top3, data = .x))) %>%
+  mutate(R2 = map_dbl(Mod, ~round(summary(.x)$r.squared, 3))) 
+
+bakers_lm_bottom <- bakers %>%
+  group_by(age_generation) %>%
+  nest() %>%
+  mutate(Mod = map(data, ~lm(percent_episodes_appeared ~ technical_bottom, data = .x))) %>%
+  mutate(R2 = map_dbl(Mod, ~round(summary(.x)$r.squared, 3))) 
+
+plot1 <- ggplot(bakers, aes(x = technical_bottom, 
+                            y = percent_episodes_appeared)) +
+  geom_smooth(aes(color = "# of Bottom 3 Appearances"),
+              se = FALSE, method = "lm") +
+  geom_smooth(aes(x = technical_top3, color = "# of Top 3 Appearances"),
+              se = FALSE, method = "lm") +
+  geom_point(shape = 1, color = "#D56065", aes(text = baker_stats)) +
+  geom_point(aes(x = technical_top3, text = baker_stats), shape = 16,
+             color = "#4A55A4") +
+  geom_rug(sides = "r", alpha = 0.2) +
+  facet_wrap(~ factor(age_generation, levels = c("Baby Boomers", "Gen X", 
+                                                 "Millennials",
+                                                 "Silent Generation",
+                                                 "Gen Z"))) +
+  labs(
+    y = "Percentage of Episodes Appeared In",
+    x = "Number of Times Appearing in Technial Top or Bottom 3",
+    title =
+      "Episode Appearances vs. Technical Challenge Ranking Frequency",
+    subtitle = "By Age Generation of Bakers from Great British Baking Show"
+  ) +
+    geom_text(x=2, y=110, aes(label = paste("R2 =", R2)),
+              data = bakers_lm_top, color = "#4A55A4", size = 3) +
+    geom_text(x=6, y=35, aes(label = paste("R2 =", R2)),
+              data = bakers_lm_bottom, color = "#D56065", size = 3) +
+  scale_color_manual(
+    name = NULL,
+    breaks = c("# of Bottom 3 Appearances", "# of Top 3 Appearances"),
+    values = c("# of Bottom 3 Appearances" = "#D56065", 
+               "# of Top 3 Appearances" = "#4A55A4")
+  ) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_minimal()
+ggplotly(plot1) |>
+  layout(legend = list(orientation = "v", x = .7, y = 0.15))
+
+```
+
+## Technical Challenge Ranking and Generation
+
+```{r data-wrangling-plot2}
+#| include: false
+bakers1 <- bakers |>
+  pivot_longer(
+    cols = c(technical_highest, technical_lowest, technical_median),
+    names_to = "score_type"
+  ) |>
+  mutate(score_type = case_when(
+    score_type == "technical_highest" ~ "Highest Ranking",
+    score_type == "technical_lowest" ~ "Lowest Ranking",
+    score_type == "technical_median" ~ "Median Ranking"
+  )) |>
+  rename(amount = value) |>
+  filter(age_generation != "Silent Generation" & age_generation != "Gen Z")
+
+bakers_meds <- bakers1 |>
+  drop_na(amount) |>
+  group_by(age_generation, score_type)|>
+  summarize(median = median(amount))
+
+```
+
+```{r plot-2}
+ggplot(data = bakers1, aes(
+  x = amount, y = age_generation,
+  fill = age_generation
+)) +
+  geom_boxplot() +
+  geom_text(data = bakers_meds, aes(x = median, y = age_generation, label = median, color = age_generation), size = 3, vjust = 5, fontface = "bold") +
+  facet_wrap(~factor(score_type, levels = c("Lowest Ranking", "Median Ranking", 
+                                                 "Highest Ranking"))) +
+  theme(legend.position = "none", plot.caption = element_text(size = 7)) +
+  scale_fill_bakeoff(palette = "showstopper") +
+  scale_color_bakeoff(palette = "showstopper") +
+  labs(
+    y = NULL, x = "Technical Challenge Ranking",
+    title = "Technical Challenge Rankings by Age Generation", 
+    caption = "Gen Z and Silent Generation not included
+    due to small sample sizes (n= 4 & n=1 respectively)"
+  )
+
+```
 
 ## Number of Viewers Across Series
 
@@ -151,6 +272,7 @@ median_7day_ep <-
 overall_median <- median(new$viewers_7day)
 #next code chunk --> ggplot
 ```
+
 ```{r}
 ggplot(new) +
   geom_density_ridges_gradient(aes(x=viewers_7day, y=episode, fill=new_series), scale=1, rel_min_height=0.01, show.legend = TRUE) +
@@ -203,9 +325,7 @@ or text in two columns $^*$
 
 ## Code
 
-
 ## Plots
-
 
 ## Plot and text
 
