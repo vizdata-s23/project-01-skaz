@@ -26,6 +26,9 @@ library(dplyr)
 library(ggridges)
 library(scales)
 library(ggimage)
+library(png)
+library(grid)
+library(here)
 ```
 
 ```{r setup}
@@ -51,21 +54,19 @@ knitr::opts_chunk$set(
 
 Our dataset comes from TidyTuesday's October 25th challenge; it can be found under the bakeoff package developed by Alison Hill, Chester Ismay, and Richard Iannone. All of the data is derived from the first ten seasons of the acclaimed reality TV show "The Great British Bakeoff," which - over the course of each of its thirteen seasons (ten of which are documented in our dataset) - pits bakers from around England against each other in a series of technical (testing the acuity of one's refined baking skills) and creative challenges. As fans of the show, this dataset jumped out at us right away, but what really sealed the deal in our decision to use this dataset is how diverse its vast array of both categorical and and numeric variables is.
 
-The dataset includes 4 dataframes: `bakers`, `ratings`, `challenges`, and `episodes`. Bakers has 120 rows, each representing an individual baker and 24 columns. Ratings has 94 rows, each representing an episode, and 11 variables such as the ratings and the original airdates in the US and the UK. Challenges has details about the three types of challenges (signature, technical, and showstopper) as well as the performance of each baker (star baker, eliminated). It has 1136 rows, each representing a baker per episode, and 7 variables. As for episodes, it has 94 rows and 10 variables. Each row represents an episode and the variables describe different attributes of the episode like the number of bakers that appeared in it or the name of eliminated bakers. The variables that we use in this project include `percent_episodes_appeared` (the percentage of episodes a given baker appeared in out of all the episodes aired in that season), `technical_bottom` (how many times a baker appeared in the bottom 3 on a technical challenge), `technical_top3`(how many times a baker appeared in the top 3 on a technical challenge), `technical_highest` (the highest ranking earned by a baker on a technical challenge in the whole season - 1 being the best), `technical_lowest` (the lowest ranking earned by a baker on a technical challenge in the whole season), `technical_median`(the median ranking earned by a baker on all the season's technical challenges), `age` (the age of a baker at the time of the competition), `series` (which season an episode comes from),  `viewers_7day`(how many views the episode had in its first 7 days on the air), and `uk_airdate` (the date the show aired in the UK).
+The dataset includes 4 dataframes: `bakers`, `ratings`, `challenges`, and `episodes`. Bakers has 120 rows, each representing an individual baker and 24 columns. Ratings has 94 rows, each representing an episode, and 11 variables such as the ratings and the original airdates in the US and the UK. Challenges has details about the three types of challenges (signature, technical, and showstopper) as well as the performance of each baker (star baker, eliminated). It has 1136 rows, each representing a baker per episode, and 7 variables. As for episodes, it has 94 rows and 10 variables. Each row represents an episode and the variables describe different attributes of the episode like the number of bakers that appeared in it or the name of eliminated bakers. The variables that we use in this project include `percent_episodes_appeared` (the percentage of episodes a given baker appeared in out of all the episodes aired in that season), `technical_bottom` (how many times a baker appeared in the bottom 3 on a technical challenge), `technical_top3`(how many times a baker appeared in the top 3 on a technical challenge), `technical_highest` (the highest ranking earned by a baker on a technical challenge in the whole season - 1 being the best), `technical_lowest` (the lowest ranking earned by a baker on a technical challenge in the whole season), `technical_median`(the median ranking earned by a baker on all the season's technical challenges), `age` (the age of a baker at the time of the competition), `series` (which season an episode comes from), `viewers_7day`(how many views the episode had in its first 7 days on the air), and `uk_airdate` (the date the show aired in the UK).
 
 ## Question 1: How does a baker's age and their performance in the technical challenges correlate to how many episodes they last for?
 
 ### Introduction
 
-Because a contestant’s overall performance in the show (and thus, ability to remain on the show) is determined by both their technical score and their creative score, we were curious which generations’ technical scores mattered most in their longevity. Thus, for generations where the technical challenge rankings are not as strong of predictors of the data, we can assume that for that generation, on average, creative challenge scores are a larger predictor of longevity. Identifying this pattern can help us understand how strategies and skill levels vary by generation. For instance, given millennials’ more free-willed reputation, can we expect that they’ll be more reliant on creative challenges, or should we expect that because older generations have garnered more kitchen experience, their technical challenge performance will be a stronger predictor of the percentage of episodes they appear in? To do this, we will use the `bakers` dataset and the variables `percent_episodes_appeared`,  `technical_bottom`,  `technical_top3`,  `tehcnical_highest`,  `technical_lowest`, `technical_median`, `uk_airdate`, and `age`. We use the variable `age` and `uk_airdate` to calculate the bakers’ birth years and subsequent generations under the variable `age_generation`. We had to use birth years rather than ages to create the generations variable because the show's seasons span across several years, meaning that (because the ages are those of the contestants at their time of competing) the ages are not calculated at the same point in time for all of the contestants. The birth years of each generation were determined using [this Mental Floss article](https://www.mentalfloss.com/article/609811/age-ranges-millennials-and-generation-z)
+Because a contestant's overall performance in the show (and thus, ability to remain on the show) is determined by both their technical score and their creative score, we were curious which generations' technical scores mattered most in their longevity. Thus, for generations where the technical challenge rankings are not as strong of predictors of the data, we can assume that for that generation, on average, creative challenge scores are a larger predictor of longevity. Identifying this pattern can help us understand how strategies and skill levels vary by generation. For instance, given millennials' more free-willed reputation, can we expect that they'll be more reliant on creative challenges, or should we expect that because older generations have garnered more kitchen experience, their technical challenge performance will be a stronger predictor of the percentage of episodes they appear in? To do this, we will use the `bakers` dataset and the variables `percent_episodes_appeared`, `technical_bottom`, `technical_top3`, `tehcnical_highest`, `technical_lowest`, `technical_median`, `uk_airdate`, and `age`. We use the variable `age` and `uk_airdate` to calculate the bakers' birth years and subsequent generations under the variable `age_generation`. We had to use birth years rather than ages to create the generations variable because the show's seasons span across several years, meaning that (because the ages are those of the contestants at their time of competing) the ages are not calculated at the same point in time for all of the contestants. The birth years of each generation were determined using [this Mental Floss article](https://www.mentalfloss.com/article/609811/age-ranges-millennials-and-generation-z)
 
 ### Approach
 
-To first answer this question, we’ve chosen to use a scatter plot graph with linear trend lines, using `percent_episodes_appeared` on the y-axis. We’ve opted to use `percent_episodes_appeared` as opposed to `total_episodes_appeared` as our predicted variable because the number of episodes in each season varies, which means that the significance of how many episodes a person is in fluctuates based on the season (for example, being in 8 episodes of season 2 would imply making it all the way to the finale, whereas being in 8 episodes of season 3 would only imply making it to the quarter-finals). We’ve chosen to use a scatter plot because we wanted each data point to represent a specific baker. This format allows us to enable the ggplotly feature such that viewers can see each baker’s specific age, occupation, and hometown. Occupation and hometown had too many diverse observations to plot them aesthetically, but because these demographics could nonetheless reveal fascinating trends - or simply points of intrigue - in the data, we figured it best to include them within the plotly text (so that they don’t clutter the visualization but can be viewed at will). The combination of the scatter plot and the trend lines also makes it so that the audience can view any potential outliers in the data and peruse specific data points’ demographics with ggplotly while still having a clear means of seeing the trends in the data via the lines. The relatively high R-squared-values of our linear regressions (mainly those for the top 3 variable) also demonstrate how effectively the linear model fits our data set. The R-squared-values for the bottom 3 are notably low, which we address in our analysis. Finally, we faceted by generation in hopes of identifying a) which age group tends to last the longest in the competition and b) for which age groups technical challenge rankings are a larger predictor of longevity. To aid these two faceting goals, we added a rug plot to the righthand y-axis to make clearer around which section of the percentage of episodes appeared in the age groups most clumped. We also ordered our faceting so that the three most relevant plots would be side-by-side and thus easier to compare trends between. Because there’s only ever been one baker from the Silent Generation and 4 from Gen Z, we didn’t consider the trends in those plots to be markedly relevant.
+To first answer this question, we've chosen to use a scatter plot graph with linear trend lines, using `percent_episodes_appeared` on the y-axis. We've opted to use `percent_episodes_appeared` as opposed to `total_episodes_appeared` as our predicted variable because the number of episodes in each season varies, which means that the significance of how many episodes a person is in fluctuates based on the season (for example, being in 8 episodes of season 2 would imply making it all the way to the finale, whereas being in 8 episodes of season 3 would only imply making it to the quarter-finals). We've chosen to use a scatter plot because we wanted each data point to represent a specific baker. This format allows us to enable the ggplotly feature such that viewers can see each baker's specific age, occupation, and hometown. Occupation and hometown had too many diverse observations to plot them aesthetically, but because these demographics could nonetheless reveal fascinating trends - or simply points of intrigue - in the data, we figured it best to include them within the plotly text (so that they don't clutter the visualization but can be viewed at will). The combination of the scatter plot and the trend lines also makes it so that the audience can view any potential outliers in the data and peruse specific data points' demographics with ggplotly while still having a clear means of seeing the trends in the data via the lines. The relatively high R-squared-values of our linear regressions (mainly those for the top 3 variable) also demonstrate how effectively the linear model fits our data set. The R-squared-values for the bottom 3 are notably low, which we address in our analysis. Finally, we faceted by generation in hopes of identifying a) which age group tends to last the longest in the competition and b) for which age groups technical challenge rankings are a larger predictor of longevity. To aid these two faceting goals, we added a rug plot to the righthand y-axis to make clearer around which section of the percentage of episodes appeared in the age groups most clumped. We also ordered our faceting so that the three most relevant plots would be side-by-side and thus easier to compare trends between. Because there's only ever been one baker from the Silent Generation and 4 from Gen Z, we didn't consider the trends in those plots to be markedly relevant.
 
-For our second plot, we chose to create a boxplot to compare trends in the bakers’ technical challenge scores and which generation tends to perform best in them. We used a box plot as opposed to a scatter or lollipop plot because we wanted to see the variation of each generation’s technical challenge rankings and a boxplot permits us to see the median, IQR, and outliers of each plot. Per our prior approach, we suspected that older generations - by nature of having more experience in the kitchen - would generally perform better in technical challenges, so we chose to do a different box plot for each age group. In order to curate all of these using one geom, we pivoted the data so that each baker had a separate observation for their highest, lowest, and median technical ranking, and then we created a new variable called  `score_type`  to identify which of the three rankings the observation represented. We chose to not include Gen Z and Silent Generation because of their sample sizes (n=4 and n=1 respectively). Finally, because the median is our main source of comparison between generations, we opted to make it extra visible by documenting its value under each plot.
-
-
+For our second plot, we chose to create a boxplot to compare trends in the bakers' technical challenge scores and which generation tends to perform best in them. We used a box plot as opposed to a scatter or lollipop plot because we wanted to see the variation of each generation's technical challenge rankings and a boxplot permits us to see the median, IQR, and outliers of each plot. Per our prior approach, we suspected that older generations - by nature of having more experience in the kitchen - would generally perform better in technical challenges, so we chose to do a different box plot for each age group. In order to curate all of these using one geom, we pivoted the data so that each baker had a separate observation for their highest, lowest, and median technical ranking, and then we created a new variable called `score_type` to identify which of the three rankings the observation represented. We chose to not include Gen Z and Silent Generation because of their sample sizes (n=4 and n=1 respectively). Finally, because the median is our main source of comparison between generations, we opted to make it extra visible by documenting its value under each plot.
 
 ### Analysis
 
@@ -198,19 +199,15 @@ ggplot(data = bakers1, aes(
   )
 ```
 
-
 ### Discussion
 
-Across all age groups with significant sample sizes, the number of times appearing in the top 3 and bottom 3 is positively correlated with the percentage of episodes appeared in, but across all generations, the number of times appearing in the top 3 is a stronger predictor of the percentage of episodes appeared in, as signified by its significantly higher R-squared values. Despite being an indicator of poor performance (which is typically associated with lower longevity in the show), the number of bottom 3 appearances is likely still positively correlated with the percentage of episodes appeared in because in order to appear in the bottom 3 more, one implicitly has to appear in more episodes. The Bottom 3 trend line's low R-squared value across generations likely has to do with the fact that it’s positively correlated despite being an indicator of poor performance. Moreover, the y-intercept of the trend lines for the top 3 are all greater than those of the bottom 3 trend lines, implying that being in the top 3 more frequently correlates to being in a higher percentage of episodes than being the bottom 3 does. This correlation is reinforced by the fact that for Baby Boomers, Gen X, and Millennials, the trend line for the number of bottom 3 appearances and the trend line for the number of top 3 appearances are parallel, signifying that the number of times appearing in the top 3 and the number of times appearing in the bottom 3 are similarly related to the percentage of episodes appeared in (they have similar slopes). 
+Across all age groups with significant sample sizes, the number of times appearing in the top 3 and bottom 3 is positively correlated with the percentage of episodes appeared in, but across all generations, the number of times appearing in the top 3 is a stronger predictor of the percentage of episodes appeared in, as signified by its significantly higher R-squared values. Despite being an indicator of poor performance (which is typically associated with lower longevity in the show), the number of bottom 3 appearances is likely still positively correlated with the percentage of episodes appeared in because in order to appear in the bottom 3 more, one implicitly has to appear in more episodes. The Bottom 3 trend line's low R-squared value across generations likely has to do with the fact that it's positively correlated despite being an indicator of poor performance. Moreover, the y-intercept of the trend lines for the top 3 are all greater than those of the bottom 3 trend lines, implying that being in the top 3 more frequently correlates to being in a higher percentage of episodes than being the bottom 3 does. This correlation is reinforced by the fact that for Baby Boomers, Gen X, and Millennials, the trend line for the number of bottom 3 appearances and the trend line for the number of top 3 appearances are parallel, signifying that the number of times appearing in the top 3 and the number of times appearing in the bottom 3 are similarly related to the percentage of episodes appeared in (they have similar slopes).
 
-Finally, the generational R-squared values indicate which generations’ technical challenge rankings accounted for a larger percentage of the variability in the relationship between technical challenge performance and longevity in the competition. Contrary to our prior belief, - of the three generations with noteworthy sample sizes - top 3 performance in the technical challenges was the strongest predictor of longevity for Millennials with a R-squared value of 0.737, followed by Gen X  with an R-squared value of 0.689, and lastly, Baby Boomers with an R-squared of 0.617. Notably, though, all of these R-squared values are moderately strong and none vary too much from one another. The relatively small sample size of each generation could be partially to blame because the small sample sizes increase the impact of outliers in correlation calculations. In the context of the show, we believe this contradiction to our suspicions could also be attributed to the fact that none of the contestants (or none that we note upon a scan of the occupations using plotly) make careers out of baking, meaning that older generations haven’t spent much more time professionally refining their baking skills. Additionally, because the technical skills are taught at the top of each challenge, the younger generations’ better technical performances could be a reflection of their better absorption of new knowledge or better familiarity with trendy and unique techniques. Finally, on average, it appears that Gen X and Millennials tend to last longer in the competition than Baby Boomers because the rug plot points for Baby Boomers are clumped more heavily around the lower half of percentage of episodes appeared whereas Gen X and Millennials’ data points are more equally distributed across the graph or concentrated on the upper half of the y-axis. This better overall performance could be attributed to the aforementioned characteristics that give them a leg-up in technical challenges in combination with any youthful innovation that may come to play in the creative challenges.
+Finally, the generational R-squared values indicate which generations' technical challenge rankings accounted for a larger percentage of the variability in the relationship between technical challenge performance and longevity in the competition. Contrary to our prior belief, - of the three generations with noteworthy sample sizes - top 3 performance in the technical challenges was the strongest predictor of longevity for Millennials with a R-squared value of 0.737, followed by Gen X with an R-squared value of 0.689, and lastly, Baby Boomers with an R-squared of 0.617. Notably, though, all of these R-squared values are moderately strong and none vary too much from one another. The relatively small sample size of each generation could be partially to blame because the small sample sizes increase the impact of outliers in correlation calculations. In the context of the show, we believe this contradiction to our suspicions could also be attributed to the fact that none of the contestants (or none that we note upon a scan of the occupations using plotly) make careers out of baking, meaning that older generations haven't spent much more time professionally refining their baking skills. Additionally, because the technical skills are taught at the top of each challenge, the younger generations' better technical performances could be a reflection of their better absorption of new knowledge or better familiarity with trendy and unique techniques. Finally, on average, it appears that Gen X and Millennials tend to last longer in the competition than Baby Boomers because the rug plot points for Baby Boomers are clumped more heavily around the lower half of percentage of episodes appeared whereas Gen X and Millennials' data points are more equally distributed across the graph or concentrated on the upper half of the y-axis. This better overall performance could be attributed to the aforementioned characteristics that give them a leg-up in technical challenges in combination with any youthful innovation that may come to play in the creative challenges.
 
-Based on the second visualization, we can see that, on average, Millennials tend to perform the best on technical challenges because the median of their median rankings is the closest to first place and the median of their highest rankings is actually equal to first place. Baby Boomers - on the other hand - perform the worst across the board because their boxplot medians are lowest for all three ranking summary statistics (maximum, minimum, and median). These results are consistent with the findings from the first visualization in suggesting that Millennials perform better and thus rely more heavily on their technical challenge scores in order to remain in the competition, which, again, likely reflects their quicker learning skills and awareness of trendy baking techniques. It’s worth noting that there are outliers for Millennials and Gen X in calculating the highest ranking and an outlier for Millennials in calculating the median ranking. Millennials and Gen X both have sample sizes that are more than double that of Baby Boomers, which would increase the likelihood that they have outliers. Finally, the plots for the highest and median rankings are all skew right, which makes sense because the highest rankings plots are concentrated around the highest possible rankings (which can’t exceed first place) and as the season progresses (and more bakers are eliminated), the lowest possible ranking decreases such that when they’re calculated into the median, there are significantly more high ranking values (close to 1) in the data set than low ranking values. It follows that most of the plots for the lowest rankings are slightly skewed left because although they’re concentrated on the lowest rankings, the lowest possible ranking gets closer to 1 as each season progresses and more bakers are eliminated.
-
+Based on the second visualization, we can see that, on average, Millennials tend to perform the best on technical challenges because the median of their median rankings is the closest to first place and the median of their highest rankings is actually equal to first place. Baby Boomers - on the other hand - perform the worst across the board because their boxplot medians are lowest for all three ranking summary statistics (maximum, minimum, and median). These results are consistent with the findings from the first visualization in suggesting that Millennials perform better and thus rely more heavily on their technical challenge scores in order to remain in the competition, which, again, likely reflects their quicker learning skills and awareness of trendy baking techniques. It's worth noting that there are outliers for Millennials and Gen X in calculating the highest ranking and an outlier for Millennials in calculating the median ranking. Millennials and Gen X both have sample sizes that are more than double that of Baby Boomers, which would increase the likelihood that they have outliers. Finally, the plots for the highest and median rankings are all skew right, which makes sense because the highest rankings plots are concentrated around the highest possible rankings (which can't exceed first place) and as the season progresses (and more bakers are eliminated), the lowest possible ranking decreases such that when they're calculated into the median, there are significantly more high ranking values (close to 1) in the data set than low ranking values. It follows that most of the plots for the lowest rankings are slightly skewed left because although they're concentrated on the lowest rankings, the lowest possible ranking gets closer to 1 as each season progresses and more bakers are eliminated.
 
 ## Question 2: How do the different characteristics of each season and the progression of episodes within each season influence the show's viewership?
-
-
 
 ### Introduction
 
@@ -229,6 +226,7 @@ The second graph will explore how viewership changes throughout seasons. To that
 ### Analysis
 
 (2-3 code blocks, 2 figures, text/code comments as needed): In this section, provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. You are welcome to use theme functions to customize the appearance of your plot, but you are not required to do so. All plots must be made with **ggplot2**. Do not use base R or lattice plotting functions.
+
 ```{r Q2-plot1}
 library(patchwork)
 library("jpeg")
@@ -302,6 +300,67 @@ ggplot(ratings_ppl, aes(x = series, y = viewers_7day_mean))+
 
 ```
 
+```{r Question-2-Plot-1}
+
+ratings_ppl <- ratings |>
+  group_by(series)|>
+  
+  mutate(viewers_7day_mean = mean(viewers_7day)) |>
+  mutate(presenters = case_when(
+    series <=7 ~ "Sue Perkins & Mel Giedroyc",
+    series >=8 & series <=10 ~ "Noel Fielding & Sandi Toksvig"
+  ))|>
+  mutate(judges = case_when(
+    series <= 7 ~ "Paul Hollywood & Mary Berry",
+    series >= 8 ~ "Paul Hollywood & Prue Leith"
+  )) |>
+  mutate(channel = case_when(
+    series <= 4 ~ "BBC Two",
+    series >4 & series <8 ~ "BBC One", 
+    series >= 8 ~ "Channel 4"
+  ))
+format <- tribble(
+  ~box_min, ~box_max, ~color_f,      ~channel_f,
+  0,        4.5,        "#005e70",   "BBC Two",
+  4.5,        7.5,        "#cb0b0a",   "BBC One",
+  7.5,        11,       "#01a7bd",   "Channel 4"
+  )
+
+
+bbc_two <- readPNG(here("images","BBC_Two_logo.png"))
+bbc_one <- readPNG(here("images","BBC_One_logo.png"))
+channel4 <- readPNG(here("images","Channel_4_logo.png"))
+
+two <- rasterGrob(bbc_two, interpolate=TRUE)
+one <- rasterGrob(bbc_one, interpolate=TRUE)
+four <- rasterGrob(channel4, interpolate=TRUE)
+
+ymin <- 1
+ymax <- 2
+
+ggplot(ratings_ppl, aes(x = series, y = viewers_7day_mean))+
+  geom_rect(data = format, aes(xmin = box_min, xmax = box_max,ymin = 0, ymax = Inf,fill = color_f, y = NULL, x = NULL))+
+  scale_fill_identity()+
+  geom_segment(data = ratings_ppl, aes(x = factor(series), xend = factor(series), y = 0, yend = viewers_7day_mean),color = "white", size = 2)+
+  geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 6)+
+  
+  
+  annotation_custom(two, xmin=2, xmax=3, ymin=13, ymax=Inf) +
+  annotation_custom(one, xmin=5.5, xmax=6.5, ymin=13, ymax=Inf) +
+  annotation_custom(four, xmin=8.5, xmax=9.5, ymin=13, ymax=Inf) +
+  theme_minimal()+
+  scale_color_bakeoff(palette = "showstopper") +
+  labs(
+    title = "Number of Viewers across Series",
+    x = "Series",
+    y = "Mean 7 Day Viewership (by millions)",
+    fill = "Channels",
+    color = "Presenters"
+  )
+
+
+```
+
 ```{r Q2-data-wrangling}
 
 new_ratings <-
@@ -334,10 +393,11 @@ median_7day_ep <-
 
 ggplot(new) +
   geom_density_ridges_gradient(aes(x=viewers_7day, y=episode, fill=new_series), scale=1, rel_min_height=0.01, show.legend = TRUE) +
-  geom_segment(data=median_7day_ep, aes(x=median, xend=median, y=episode, yend=episode+1), linetype="longdash", color="white", size=2)+
+  geom_segment(data=median_7day_ep, aes(x=median, xend=median, y=episode, yend=episode+1), color="#A2A6AC", size=2)+
   #annotate("text", x=8.6, y=5.9, label="Median", angle=90, fontface="bold")+
   scale_fill_bakeoff(palette="showstopper")+
-  guides(fill=guide_legend("Channel"))+
+  #uides(fill=guide_legend("Channel"))+
+  scale_fill_manual(c("#005e70",  "#cb0b0a", "#01a7bd"))+
   scale_x_discrete(limits = c(0, 5, median(new$viewers_7day), 10, 15),
     labels=c('0', '5', 'Overall \nMedian', '10', '15'))+
   
@@ -345,7 +405,7 @@ ggplot(new) +
        y= "Episode Number",
        title= "Ridge densities of number of viewers in 7-day period per episode",
        subtitle= "Split by broadcasting channel",
-       caption= "Source: TidyTuesday (October 25th, 2022)")+
+       caption= "Gray lines represent the median viewership over all episodes")+
   theme_minimal()
 
 
