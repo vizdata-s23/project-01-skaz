@@ -274,7 +274,7 @@ ggplot(ratings_ppl, aes(x = series, y = viewers_7day_mean))+
   annotation_custom(one, xmin=5.5, xmax=6.5, ymin=13, ymax=Inf) +
   annotation_custom(four, xmin=8.5, xmax=9.5, ymin=13, ymax=Inf) +
   theme_minimal()+
-  scale_color_bakeoff(palette = "showstopper") +
+  scale_color_bakeoff(palette = "showstopper", direction = -1) +
   labs(
     title = "Number of Viewers across Series",
     x = "Series",
