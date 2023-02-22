@@ -270,8 +270,8 @@ four <- rasterGrob(channel4, interpolate=TRUE)
 ggplot(ratings_ppl, aes(x = series, y = viewers_7day_mean))+
   geom_rect(data = format, aes(xmin = box_min, xmax = box_max,ymin = 0, ymax = Inf,fill = color_f, y = NULL, x = NULL))+
   scale_fill_identity()+
-  geom_segment(data = ratings_ppl, aes(x = factor(series), xend = factor(series), y = 0, yend = viewers_7day_mean),color = "white", size = 2)+
-  geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 6)+
+  geom_segment(data = ratings_ppl, aes(x = factor(series), xend = factor(series), y = 0, yend = viewers_7day_mean), color = "white", size = 2)+
+  geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 12)+ 
   annotation_custom(two, xmin=2, xmax=3, ymin=13, ymax=Inf) +
   annotation_custom(one, xmin=5.5, xmax=6.5, ymin=13, ymax=Inf) +
   annotation_custom(four, xmin=8.5, xmax=9.5, ymin=13, ymax=Inf) +
