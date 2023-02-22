@@ -268,8 +268,8 @@ four <- rasterGrob(channel4, interpolate=TRUE)
 ggplot(ratings_ppl, aes(x = series, y = viewers_7day_mean))+
   geom_rect(data = format, aes(xmin = box_min, xmax = box_max,ymin = 0, ymax = Inf,fill = color_f, y = NULL, x = NULL))+
   scale_fill_identity()+
-  geom_segment(data = ratings_ppl, aes(x = factor(series), xend = factor(series), y = 0, yend = viewers_7day_mean), color = "white", size = 2)+
-  geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 12)+ 
+  geom_segment(data = ratings_ppl, aes(x = factor(series), xend = factor(series), y = 0, yend = viewers_7day_mean, linetype=judges), color = "white", size = 2)+
+  geom_point(data = ratings_ppl, aes(x = factor(series), y = viewers_7day_mean, color = presenters), size = 10)+ 
   annotation_custom(two, xmin=2, xmax=3, ymin=13, ymax=Inf) +
   annotation_custom(one, xmin=5.5, xmax=6.5, ymin=13, ymax=Inf) +
   annotation_custom(four, xmin=8.5, xmax=9.5, ymin=13, ymax=Inf) +
@@ -280,8 +280,10 @@ ggplot(ratings_ppl, aes(x = series, y = viewers_7day_mean))+
     x = "Series",
     y = "Mean 7 Day Viewership (by millions)",
     fill = "Channels",
-    color = "Presenters"
-  )
+    color = "Presenters",
+    linetype = "Judges"
+  )+
+  theme(legend.key = element_rect(fill = "lightgray"))
 
 
 ```
@@ -316,6 +318,8 @@ overall_median <- median(new$viewers_7day)
 ```
 
 ```{r Q2-plot2}
+library(ggrepel)
+
 
 ggplot(new) +
   geom_density_ridges_gradient(aes(x=viewers_7day, y=episode, fill=new_series), scale=1, rel_min_height=0.01, show.legend = TRUE) +
@@ -325,12 +329,11 @@ ggplot(new) +
   scale_fill_manual(values=c("#005e70", "#cb0b0a", "#01a7bd"))+
 scale_x_continuous(breaks = c(0, 5, overall_median, 10, 15),
                    labels = c('0', '5', 'Overall\nMedian', '10', '15')) +
-  
   labs(x= "Viewers (in Millions)",
        y= "Episode Number",
        title= "Ridge densities of number of viewers in 7-day period per episode",
        subtitle= "Split by broadcasting channel",
-       caption= "Gray lines represent the median viewership over all episodes")+
+       caption= "Gray lines represent the median viewership over all episodes\n The 10 episode count is not a perfect finale viewership estimate since S1 and S2 only have 6 and 8 episodes each")+
   theme_minimal()
 
 
